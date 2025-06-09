@@ -1,3 +1,4 @@
+const discordAuthRoutes = require('./discord-auth');
 const express = require('express');
 const axios = require('axios');
 const cookieParser = require('cookie-parser');
