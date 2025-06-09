@@ -2,11 +2,9 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>PhoneTap</title>
-    <!-- CSS-стилі: шрифти, кольори, фон, піксельний шрифт тощо -->
-    <script src="https://cdn.tailwindcss.com"></script> <!-- Included for utility classes if needed, though most styles are custom -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
             --neon-pink: #FF00FF;
@@ -18,6 +16,13 @@
             --border-color: var(--electric-blue);
         }
 
+        html, body {
+          height: 100%;
+          max-width: 100%;
+          overflow-x: hidden;
+          touch-action: manipulation;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background: url('https://i.postimg.cc/8P34RGJT/Chat-GPT-Image-26-2025-19-50-54.png') center center no-repeat;
@@ -25,21 +30,36 @@
             background-attachment: fixed;
             background-color: var(--dark-bg);
             color: var(--text-color);
-            overscroll-behavior-y: contain;
-            min-height: 100vh;
             margin: 0;
         }
 
+        img, button {
+          max-width: 100%;
+          height: auto;
+          user-select: none;
+          -webkit-user-drag: none;
+          touch-action: manipulation;
+        }
+
         .app-container {
-            max-width: 420px;
-            min-height: 100vh;
-            margin: 0 auto;
-            background-color: var(--container-bg);
-            backdrop-filter: blur(8px);
+            width: 100%;
+            height: 100dvh; /* підтримка мобільного viewport */
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
+            background-color: var(--container-bg);
+            backdrop-filter: blur(8px);
             box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
             border: 1px solid rgba(0, 255, 255, 0.2);
+            padding-bottom: 85px; /* Space for fixed bottom nav */
+        }
+
+        .login-container {
+          width: 100%;
+          height: 100dvh; /* підтримка мобільного viewport */
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
         }
 
         .hud {
@@ -72,8 +92,7 @@
             justify-content: center;
             align-items: center;
             margin: 5px 0; 
-            padding-top: 10px; 
-            padding-bottom: 5px;
+            padding: 5px 10px;
             flex-grow: 1; 
             min-height: 300px; 
         }
@@ -85,8 +104,6 @@
             transition: transform 0.1s ease-in-out, filter 0.2s;
             animation: glowPulsePunk 2.5s infinite ease-in-out;
             cursor: pointer;
-            user-select: none;
-            -webkit-user-drag: none;
         }
         .tap-capsule-img:active {
             transform: scale(0.95) rotate(2deg);
@@ -155,13 +172,16 @@
         }
 
         .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
             display: flex;
             justify-content: space-around;
             background-color: rgba(10, 10, 20, 0.95);
             padding: 16px 0; 
             border-top: 1px solid var(--border-color);
-            width: 100%;
-            z-index: 100;
         }
 
         .nav-button {
@@ -195,7 +215,7 @@
 
         .tab-content-wrapper {
             flex-grow: 1;
-            overflow-y: auto;
+            /* overflow-y: auto; */
             display: flex;
             flex-direction: column;
             padding: 15px;
@@ -463,7 +483,7 @@
         }
     </style>
 </head>
-<body class="overflow-hidden">
+<body>
 
     <div id="languageModal">
         <h2>CHOOSE YOUR LANGUAGE / ВЫБЕРИТЕ ЯЗЫК</h2>
@@ -484,11 +504,9 @@
         <div class="tap-capsule-container" id="tapCapsuleElementContainer"> 
             <img id="mainTapCapsuleImage" class="tap-capsule-img" src="https://res.cloudinary.com/daykr7ioq/image/upload/v1749155816/ChatGPT_Image_26_%D1%82%D1%80%D0%B0%D0%B2._2025_%D1%80._18_53_50_z9nmz4.png" alt="Main Capsule"
                  onerror="this.onerror=null;this.src='https://placehold.co/360x360/0A0A1A/FF00FF?text=MAIN_CAPSULE_ERROR&font=Share+Tech+Mono';this.alt='Error loading main capsule image';" />
-            <!-- Оновлений елемент для пасивного доходу -->
             <div id="passiveIncomeDisplay" class="passive-display">+0 COINS/HOUR</div>
             <div class="tap-hint" data-translate-key="tap_hint_text">TAP THE VOID CAPSULE!</div>
-            <div id="totalTapDisplay" class="tap-total">Total tapped: 0 coins</div> <!-- Новий елемент для лічильника -->
-            <div class="cooldown-timer" id="cooldownTimerDisplay"></div>
+            <div id="totalTapDisplay" class="tap-total">Total tapped: 0 coins</div> <div class="cooldown-timer" id="cooldownTimerDisplay"></div>
         </div>
 
         <div class="tab-content-wrapper">
@@ -570,7 +588,6 @@
         </nav>
     </div>
 
-    <!-- HTML модального вікна для випадіння капсули -->
     <div id="capsuleDropModal" class="modal hidden">
         <div class="capsule-drop-content"> 
             <p id="droppedCapsuleInfo"></p>
