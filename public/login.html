@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login with Discord</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #0f0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background: #5865F2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    img {
+      width: 80px;
+      border-radius: 50%;
+      margin-bottom: 10px;
+    }
+    .profile {
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Welcome to PhoneTap</h2>
+  <button onclick="window.location.href='/login'">Login with Discord</button>
+
+  <script>
+    fetch('/me', { credentials: 'include' })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (!data) return;
+        document.body.innerHTML = `
+          <div class="profile">
+            <img src="https://cdn.discordapp.com/avatars/${data.discordId}/${data.avatar}.png">
+            <h3>${data.username}</h3>
+            <p>💰 Balance: ${data.balance}</p>
+            <p>⏱ Income/hr: ${data.incomePerHour}</p>
+            <p>👥 Referrals: ${data.referralCount}</p>
+            <p>📎 Code: ${data.referralCode}</p>
+            <p>💠 Capsules: ${data.ownedCapsules.join(", ")}</p>
+            <button onclick="logout()">Logout</button>
+          </div>`;
+      });
+
+    function logout() {
+      fetch('/logout').then(() => location.reload());
+    }
+  </script>
+</body>
+</html>
