@@ -1,194 +1,150 @@
 const express = require('express');
-const axios = require('axios');
-const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const fs = require('fs');
+const fetch = require('node-fetch');
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ 2. Змінні авторизації
-const CLIENT_ID = "1376165214206296215";
-const CLIENT_SECRET = "mJam66t0IjNnrilqf43UCJMjrB2Z1FjZ";
-const REDIRECT_URI = "https://discord-0c0o.onrender.com/auth/callback";
+// Discord OAuth налаштування
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || 'YOUR_DISCORD_CLIENT_ID';
+const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || 'YOUR_DISCORD_CLIENT_SECRET';
+const REDIRECT_URI = process.env.REDIRECT_URI || 'http://localhost:3000/auth/callback';
 
-// --- Налаштування Express ---
-app.use(cors({
-  origin: ['http://localhost:3000', 'https://discord-0c0o.onrender.com', 'https://phonetap-1.onrender.com'],
-  credentials: true
-}));
+// In-memory зберігання (в продакшені використовуйте базу даних)
+const users = new Map();
+
+app.use(cors());
 app.use(express.json());
-app.use(cookieParser());
+app.use(express.static('public'));
 
-// Middleware для безпеки та вбудовування в Discord
-app.use((req, res, next) => {
-  res.setHeader("X-Frame-Options", "ALLOWALL");
-  res.setHeader("Content-Security-Policy", "frame-ancestors *");
-  next();
+// Discord OAuth endpoints
+app.get('/auth/discord', (req, res) => {
+    const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
+    res.redirect(authUrl);
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
-
-// --- Логіка бази даних (JSON) ---
-const dbPath = path.join(__dirname, 'db.json');
-let users = {};
-
-const loadDB = () => {
-  try {
-    if (fs.existsSync(dbPath)) {
-      const data = fs.readFileSync(dbPath, 'utf8');
-      users = JSON.parse(data);
-      console.log("✅ Database loaded successfully.");
-    } else {
-      console.log("⚠️ No database file found, starting with an empty one.");
-      saveDB();
-    }
-  } catch (err) {
-    console.error("❌ Error loading database:", err);
-  }
-};
-
-const saveDB = () => {
-  try {
-    fs.writeFileSync(dbPath, JSON.stringify(users, null, 2));
-    console.log("💾 Database saved.");
-  } catch (err) {
-    console.error("❌ Error saving database:", err);
-  }
-};
-
-loadDB();
-setInterval(saveDB, 60 * 1000); // Зберігати кожну хвилину
-
-function generateReferralCode(username) {
-  const sanitizedUsername = username.toLowerCase().replace(/[^a-z0-9]/g, "").substring(0, 10);
-  const randomNumber = Math.floor(100 + Math.random() * 900);
-  return `${sanitizedUsername}${randomNumber}`;
-}
-
-// ===================================
-// --- ЕНДПОІНТИ API ---
-// ===================================
-
-// ✅ 3. Ендпоінт логіну /login
-app.get("/login", (req, res) => {
-  const scope = "identify"; // "identify email" також підходить
-  const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${scope}`;
-  res.redirect(discordAuthUrl);
-});
-
-// ✅ 4. Ендпоінт /auth/callback
-app.get("/auth/callback", async (req, res) => {
-  const { code } = req.query;
-  if (!code) {
-    return res.status(400).send("No code provided.");
-  }
-
-  try {
-    const tokenResponse = await axios.post("https://discord.com/api/oauth2/token", new URLSearchParams({
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      grant_type: "authorization_code",
-      code,
-      redirect_uri: REDIRECT_URI,
-    }), {
-      headers: { "Content-Type": "application/x-www-form-urlencoded" }
-    });
-
-    const { access_token } = tokenResponse.data;
-
-    const userResponse = await axios.get("https://discord.com/api/users/@me", {
-      headers: { Authorization: `Bearer ${access_token}` }
-    });
-
-    const { id: discordId, username, avatar } = userResponse.data;
-
-    // Створення користувача, якщо він не існує
-    if (!users[discordId]) {
-      console.log(`[Auth] Creating new user: ${username} (${discordId})`);
-      users[discordId] = {
-        username: username,
-        avatar: avatar,
-        balance: 0,
-        incomePerHour: 0,
-        referrals: [],
-        referralCode: generateReferralCode(username),
-        ownedCapsules: []
-      };
-      saveDB();
+app.get('/auth/callback', async (req, res) => {
+    const { code } = req.query;
+    
+    if (!code) {
+        return res.redirect('/?error=no_code');
     }
 
-    // Встановлення cookie з правильними налаштуваннями безпеки
-    res.cookie("discord_id", discordId, {
-      httpOnly: true,
-      sameSite: "Lax", // "Lax" - рекомендовано для безпеки
-      secure: process.env.NODE_ENV === "production", // true тільки для HTTPS
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 днів
-    });
+    try {
+        // Обмін коду на токен
+        const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                client_id: DISCORD_CLIENT_ID,
+                client_secret: DISCORD_CLIENT_SECRET,
+                grant_type: 'authorization_code',
+                code: code,
+                redirect_uri: REDIRECT_URI,
+            }),
+        });
 
-    res.redirect('/'); // Повернення користувача в гру
+        const tokenData = await tokenResponse.json();
+        
+        if (!tokenData.access_token) {
+            return res.redirect('/?error=token_error');
+        }
 
-  } catch (err) {
-    console.error("OAuth callback error:", err.response?.data || err.message);
-    res.status(500).send("Authentication failed.");
-  }
+        // Отримання інформації про користувача
+        const userResponse = await fetch('https://discord.com/api/users/@me', {
+            headers: {
+                Authorization: `Bearer ${tokenData.access_token}`,
+            },
+        });
+
+        const userData = await userResponse.json();
+        
+        if (!userData.id) {
+            return res.redirect('/?error=user_error');
+        }
+
+        // Перенаправлення на головну сторінку з Discord ID
+        res.redirect(`/?discord_id=${userData.id}&username=${encodeURIComponent(userData.username)}`);
+        
+    } catch (error) {
+        console.error('Discord OAuth error:', error);
+        res.redirect('/?error=oauth_error');
+    }
 });
 
-// Інші ендпоінти залишаються без змін, оскільки вони вже використовують cookie
-app.get("/me", (req, res) => {
-  const { discord_id } = req.cookies;
-  if (!discord_id || !users[discord_id]) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  const user = users[discord_id];
-  res.json({
-    discordId: discord_id,
-    username: user.username,
-    avatar: user.avatar,
-    balance: user.balance,
-    incomePerHour: user.incomePerHour,
-    referralCount: user.referrals.length,
-    ownedCapsules: user.ownedCapsules || [],
-    referralCode: user.referralCode
-  });
+// API endpoints
+app.post('/user', async (req, res) => {
+    try {
+        const { discordId } = req.body;
+        
+        if (!discordId) {
+            return res.status(400).json({ error: 'Discord ID is required' });
+        }
+
+        let user = users.get(discordId);
+        
+        if (!user) {
+            // Створення нового користувача
+            user = {
+                discordId: discordId,
+                balance: 0,
+                incomePerHour: 0,
+                referrals: [],
+                ownedCapsules: [],
+                energy: 200,
+                taps: 0,
+                nextTapAvailableTime: null,
+                dailyClaimData: {
+                    step: 0,
+                    lastClaimDate: null
+                }
+            };
+            users.set(discordId, user);
+        }
+
+        res.json(user);
+        
+    } catch (error) {
+        console.error('Error in /user:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
-app.post('/user', (req, res) => {
-  const discordId = req.cookies.discord_id;
-  if (!discordId || !users[discordId]) {
-    return res.status(404).json({ error: 'User not found. Please log in.' });
-  }
-  return res.json(users[discordId]);
+app.post('/update', async (req, res) => {
+    try {
+        const { discordId, ...fieldsToUpdate } = req.body;
+        
+        if (!discordId) {
+            return res.status(400).json({ error: 'Discord ID is required' });
+        }
+
+        let user = users.get(discordId);
+        
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Оновлення полів
+        Object.assign(user, fieldsToUpdate);
+        users.set(discordId, user);
+
+        res.json({ success: true, user });
+        
+    } catch (error) {
+        console.error('Error in /update:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
-app.post('/update', (req, res) => {
-  const discordId = req.cookies.discord_id;
-  if (!discordId || !users[discordId]) {
-    return res.status(404).json({ error: 'User not found' });
-  }
-  const fields = req.body;
-  const user = users[discordId];
-
-  if (fields.coins !== undefined) user.balance = fields.coins;
-  if (fields.incomePerHour !== undefined) user.incomePerHour = fields.incomePerHour;
-  if (fields.referral && !user.referrals.includes(fields.referral)) {
-    user.referrals.push(fields.referral);
-  }
-  if (fields.capsules && Array.isArray(fields.capsules)) {
-    user.ownedCapsules = fields.capsules;
-  }
-
-  saveDB();
-  res.json({ success: true, user });
+// Сервіс статичних файлів
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/logout', (req, res) => {
-    res.clearCookie('discord_id');
-    res.redirect('/');
-});
-
-// Запуск сервера
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
-});
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Discord OAuth URL: http://localhost:${PORT}/auth/discord`);
+}); 
