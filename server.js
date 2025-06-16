@@ -1,3 +1,7 @@
+if (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URI) {
+  console.error("❌ CLIENT_ID, CLIENT_SECRET або REDIRECT_URI не задані!");
+  process.exit(1);
+}
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
