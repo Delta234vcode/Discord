@@ -7,9 +7,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Discord OAuth налаштування
-const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || 'YOUR_DISCORD_CLIENT_ID';
-const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || 'YOUR_DISCORD_CLIENT_SECRET';
-const REDIRECT_URI = process.env.REDIRECT_URI || 'http://localhost:3000/auth/callback';
+const CLIENT_ID = "1376165214206296215";
+const CLIENT_SECRET = "mJam66t0IjNnrilqf43UCJMjrB2Z1FjZ";
+const REDIRECT_URI = "https://discord-0c0o.onrender.com/auth/callback";
 
 // In-memory зберігання (в продакшені використовуйте базу даних)
 const users = new Map();
