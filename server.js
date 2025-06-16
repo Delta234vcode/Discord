@@ -9,9 +9,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- OAuth2 Змінні ---
-const CLIENT_ID = "1376165214206296215";
-const CLIENT_SECRET = "mJam66t0IjNnrilqf43UCJMjrB2Z1FjZ";
-const REDIRECT_URI = "https://discord-0c0o.onrender.com/auth/callback";
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const REDIRECT_URI = process.env.REDIRECT_URI;
 
 // Перевірка змінних середовища
 if (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URI) {
@@ -178,14 +178,9 @@ app.post('/update', (req, res) => {
 
   if (fields.coins !== undefined) user.balance = fields.coins;
   if (fields.incomePerHour !== undefined) user.incomePerHour = fields.incomePerHour;
-  if (fields.referral && !user.referrals.includes(fields.referral)) {
-    user.referrals.push(fields.referral);
-  }
-  if (fields.capsules && Array.isArray(fields.capsules)) {
-    user.ownedCapsules = fields.capsules;
-  }
+  if (fields.ownedCapsules && Array.isArray(fields.ownedCapsules)) user.ownedCapsules = fields.ownedCapsules;
+  // Додай інші поля, якщо треба
 
-  console.log(`[API /update] User updated: ${discordId}`, fields);
   saveDB();
   res.json({ success: true, user });
 });
@@ -204,4 +199,4 @@ setInterval(() => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
-});
+}); 
