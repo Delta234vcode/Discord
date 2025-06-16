@@ -8,14 +8,14 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- OAuth2 Змінні ---
+// ✅ 2. Змінні авторизації
 const CLIENT_ID = "1376165214206296215";
 const CLIENT_SECRET = "mJam66t0IjNnrilqf43UCJMjrB2Z1FjZ";
-const REDIRECT_URI = "https://discord-0c0o.onrender.com/auth/callback"; // Замініть на ваш URL
+const REDIRECT_URI = "https://discord-0c0o.onrender.com/auth/callback";
 
 // --- Налаштування Express ---
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://discord-0c0o.onrender.com', 'https://phonetap-1.onrender.com'], // Додайте сюди домен вашого фронтенду
+  origin: ['http://localhost:3000', 'https://discord-0c0o.onrender.com', 'https://phonetap-1.onrender.com'],
   credentials: true
 }));
 app.use(express.json());
@@ -58,11 +58,9 @@ const saveDB = () => {
   }
 };
 
-// Завантаження та періодичне збереження БД
 loadDB();
 setInterval(saveDB, 60 * 1000); // Зберігати кожну хвилину
 
-// --- Допоміжні функції ---
 function generateReferralCode(username) {
   const sanitizedUsername = username.toLowerCase().replace(/[^a-z0-9]/g, "").substring(0, 10);
   const randomNumber = Math.floor(100 + Math.random() * 900);
@@ -73,18 +71,18 @@ function generateReferralCode(username) {
 // --- ЕНДПОІНТИ API ---
 // ===================================
 
-// --- ЗАЛИШЕНО БЕЗ ЗМІН: OAuth2 та /me ---
-
+// ✅ 3. Ендпоінт логіну /login
 app.get("/login", (req, res) => {
-  const scope = "identify";
+  const scope = "identify"; // "identify email" також підходить
   const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${scope}`;
   res.redirect(discordAuthUrl);
 });
 
+// ✅ 4. Ендпоінт /auth/callback
 app.get("/auth/callback", async (req, res) => {
   const { code } = req.query;
   if (!code) {
-    return res.status(400).send("Authorization code not provided.");
+    return res.status(400).send("No code provided.");
   }
 
   try {
@@ -106,6 +104,7 @@ app.get("/auth/callback", async (req, res) => {
 
     const { id: discordId, username, avatar } = userResponse.data;
 
+    // Створення користувача, якщо він не існує
     if (!users[discordId]) {
       console.log(`[Auth] Creating new user: ${username} (${discordId})`);
       users[discordId] = {
@@ -120,27 +119,28 @@ app.get("/auth/callback", async (req, res) => {
       saveDB();
     }
 
+    // Встановлення cookie з правильними налаштуваннями безпеки
     res.cookie("discord_id", discordId, {
       httpOnly: true,
-      secure: true, // Важливо для production
-      sameSite: "None",
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 днів
+      sameSite: "Lax", // "Lax" - рекомендовано для безпеки
+      secure: process.env.NODE_ENV === "production", // true тільки для HTTPS
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 днів
     });
 
-    res.redirect('/'); // Редірект на головну сторінку гри
+    res.redirect('/'); // Повернення користувача в гру
 
   } catch (err) {
-    console.error("❌ Discord OAuth error:", err.response ? err.response.data : err.message);
-    res.status(500).send("Failed to authenticate with Discord.");
+    console.error("OAuth callback error:", err.response?.data || err.message);
+    res.status(500).send("Authentication failed.");
   }
 });
 
+// Інші ендпоінти залишаються без змін, оскільки вони вже використовують cookie
 app.get("/me", (req, res) => {
   const { discord_id } = req.cookies;
   if (!discord_id || !users[discord_id]) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-
   const user = users[discord_id];
   res.json({
     discordId: discord_id,
@@ -154,46 +154,19 @@ app.get("/me", (req, res) => {
   });
 });
 
-app.get('/logout', (req, res) => {
-    res.clearCookie('discord_id');
-    res.redirect('/');
-});
-
-
-// --- ✅ ОНОВЛЕНІ ЕНДПОІНТИ /user та /update ---
-
-/**
- * @route POST /user
- * @desc Отримує дані користувача на основі cookie.
- * Клієнт повинен використовувати цей ендпоінт для завантаження даних гравця після
- * перевірки автентифікації через /me.
- */
 app.post('/user', (req, res) => {
   const discordId = req.cookies.discord_id;
   if (!discordId || !users[discordId]) {
-    // Якщо користувача немає в базі або немає cookie, повертаємо помилку
     return res.status(404).json({ error: 'User not found. Please log in.' });
   }
-
-  // Повертаємо повний об'єкт користувача
   return res.json(users[discordId]);
 });
 
-
-/**
- * @route POST /update
- * @desc Оновлює дані гравця. Автентифікація виключно через cookie.
- */
 app.post('/update', (req, res) => {
-  // 1. Отримуємо ID тільки з cookie
   const discordId = req.cookies.discord_id;
-
-  // 2. Перевіряємо, чи користувач автентифікований і існує
   if (!discordId || !users[discordId]) {
     return res.status(404).json({ error: 'User not found' });
   }
-
-  // 3. Оновлюємо поля
   const fields = req.body;
   const user = users[discordId];
 
@@ -202,33 +175,20 @@ app.post('/update', (req, res) => {
   if (fields.referral && !user.referrals.includes(fields.referral)) {
     user.referrals.push(fields.referral);
   }
-  // Повністю перезаписуємо масив капсул, як у клієнтському коді
   if (fields.capsules && Array.isArray(fields.capsules)) {
     user.ownedCapsules = fields.capsules;
   }
 
-  console.log(`[API /update] User updated: ${discordId}`, fields);
-  // 4. Зберігаємо зміни та повертаємо оновлені дані
   saveDB();
   res.json({ success: true, user });
 });
 
+app.get('/logout', (req, res) => {
+    res.clearCookie('discord_id');
+    res.redirect('/');
+});
 
-// --- Сервісна логіка (наприклад, щоденний дохід) ---
-setInterval(() => {
-  const now = new Date();
-  // Приклад: нараховуємо дохід щогодини
-  console.log("⏰ Checking for hourly income accrual...");
-  for (const userId in users) {
-    if (users[userId].incomePerHour > 0) {
-      users[userId].balance += users[userId].incomePerHour;
-      console.log(`> User ${userId} received ${users[userId].incomePerHour} coins.`);
-    }
-  }
-  // Збереження буде виконано наступним setInterval від saveDB
-  console.log("✅ Hourly income check complete.");
-}, 60 * 60 * 1000); // Кожну годину
-
+// Запуск сервера
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
