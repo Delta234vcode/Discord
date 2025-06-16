@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8" />
@@ -927,17 +927,16 @@
         showCustomMessage('Logged out successfully', 3000);
     }
 
-    function initDiscordLogin() {
-        if (discordLoginButtonElement) {
-            discordLoginButtonElement.addEventListener('click', () => {
-                window.location.href = `${API_BASE_URL}/auth/discord`;
-            });
-        }
-        
-        if (logoutButtonElement) {
-            logoutButtonElement.addEventListener('click', logout);
-        }
+function initDiscordLogin() {
+    if (discordLoginButtonElement) {
+        discordLoginButtonElement.addEventListener('click', () => {
+            window.location.href = '/login'; // Ось тут правильний маршрут!
+        });
     }
+    if (logoutButtonElement) {
+        logoutButtonElement.addEventListener('click', logout);
+    }
+}
 
     // Константи гри
     const MAX_TAPS_BEFORE_COOLDOWN = 200;
