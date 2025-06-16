@@ -2,7 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const fs = require('fs');
+const { MongoClient } = require('mongodb');
 const path = require('path');
 
 const app = express();
@@ -12,16 +12,17 @@ const PORT = process.env.PORT || 3000;
 const CLIENT_ID = "1376165214206296215";
 const CLIENT_SECRET = "mJam66t0IjNnrilqf43UCJMjrB2Z1FjZ";
 const REDIRECT_URI = "https://discord-0c0o.onrender.com/auth/callback";
+const MONGODB_URI = process.env.MONGODB_URI;
 
 // Перевірка змінних середовища
-if (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URI) {
-  console.error("❌ CLIENT_ID, CLIENT_SECRET або REDIRECT_URI не задані!");
+if (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URI || !MONGODB_URI) {
+  console.error("❌ CLIENT_ID, CLIENT_SECRET, REDIRECT_URI або MONGODB_URI не задані!");
   process.exit(1);
 }
 
 // --- Налаштування Express ---
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://discord-0c0o.onrender.com', 'https://phonetap-1.onrender.com'],
+  origin: ['http://localhost:3000', 'https://discord-0c0o.onrender.com'],
   credentials: true
 }));
 app.use(express.json());
@@ -36,36 +37,16 @@ app.use((req, res, next) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- Логіка бази даних (JSON) ---
-const dbPath = path.join(__dirname, 'db.json');
-let users = {};
+let db, usersCollection;
 
-const loadDB = () => {
-  try {
-    if (fs.existsSync(dbPath)) {
-      const data = fs.readFileSync(dbPath, 'utf8');
-      users = JSON.parse(data);
-      console.log("✅ Database loaded successfully.");
-    } else {
-      console.log("⚠️ No database file found, starting with an empty one.");
-      saveDB();
-    }
-  } catch (err) {
-    console.error("❌ Error loading database:", err);
-  }
-};
-
-const saveDB = () => {
-  try {
-    fs.writeFileSync(dbPath, JSON.stringify(users, null, 2));
-    console.log("💾 Database saved.");
-  } catch (err) {
-    console.error("❌ Error saving database:", err);
-  }
-};
-
-loadDB();
-setInterval(saveDB, 60 * 1000);
+async function connectDB() {
+  const client = new MongoClient(MONGODB_URI);
+  await client.connect();
+  db = client.db('phonetap');
+  usersCollection = db.collection('users');
+  console.log('✅ Connected to MongoDB Atlas');
+}
+connectDB();
 
 // --- Допоміжні функції ---
 function generateReferralCode(username) {
@@ -107,18 +88,21 @@ app.get("/auth/callback", async (req, res) => {
 
     const { id: discordId, username, avatar } = userResponse.data;
 
-    if (!users[discordId]) {
+    // --- MongoDB: створення користувача, якщо не існує ---
+    let user = await usersCollection.findOne({ discordId });
+    if (!user) {
       console.log(`[Auth] Creating new user: ${username} (${discordId})`);
-      users[discordId] = {
-        username: username,
-        avatar: avatar,
+      user = {
+        discordId,
+        username,
+        avatar,
         balance: 0,
         incomePerHour: 0,
         referrals: [],
         referralCode: generateReferralCode(username),
         ownedCapsules: []
       };
-      saveDB();
+      await usersCollection.insertOne(user);
     }
 
     res.cookie("discord_id", discordId, {
@@ -138,21 +122,30 @@ app.get("/auth/callback", async (req, res) => {
 
 app.get("/me", (req, res) => {
   const { discord_id } = req.cookies;
-  if (!discord_id || !users[discord_id]) {
+  if (!discord_id) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const user = users[discord_id];
-  res.json({
-    discordId: discord_id,
-    username: user.username,
-    avatar: user.avatar,
-    balance: user.balance,
-    incomePerHour: user.incomePerHour,
-    referralCount: user.referrals.length,
-    ownedCapsules: user.ownedCapsules || [],
-    referralCode: user.referralCode
-  });
+  usersCollection.findOne({ discordId: discord_id })
+    .then(user => {
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json({
+        discordId: discord_id,
+        username: user.username,
+        avatar: user.avatar,
+        balance: user.balance,
+        incomePerHour: user.incomePerHour,
+        referralCount: user.referrals.length,
+        ownedCapsules: user.ownedCapsules || [],
+        referralCode: user.referralCode
+      });
+    })
+    .catch(err => {
+      console.error("❌ Error retrieving user:", err);
+      res.status(500).json({ error: "Failed to retrieve user information" });
+    });
 });
 
 app.get('/logout', (req, res) => {
@@ -160,40 +153,41 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
-app.post('/user', (req, res) => {
+app.post('/user', async (req, res) => {
   const discordId = req.cookies.discord_id;
-  if (!discordId || !users[discordId]) {
-    return res.status(404).json({ error: 'User not found. Please log in.' });
-  }
-  return res.json(users[discordId]);
+  if (!discordId) return res.status(401).json({ error: 'Not logged in' });
+  const user = await usersCollection.findOne({ discordId });
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  res.json(user);
 });
 
-app.post('/update', (req, res) => {
+app.post('/update', async (req, res) => {
   const discordId = req.cookies.discord_id;
-  if (!discordId || !users[discordId]) {
-    return res.status(404).json({ error: 'User not found' });
-  }
+  if (!discordId) return res.status(401).json({ error: 'Not logged in' });
   const fields = req.body;
-  const user = users[discordId];
-
-  if (fields.coins !== undefined) user.balance = fields.coins;
-  if (fields.incomePerHour !== undefined) user.incomePerHour = fields.incomePerHour;
-  if (fields.ownedCapsules && Array.isArray(fields.ownedCapsules)) user.ownedCapsules = fields.ownedCapsules;
+  const update = {};
+  if (fields.coins !== undefined) update.balance = fields.coins;
+  if (fields.incomePerHour !== undefined) update.incomePerHour = fields.incomePerHour;
+  if (fields.ownedCapsules && Array.isArray(fields.ownedCapsules)) update.ownedCapsules = fields.ownedCapsules;
   // Додай інші поля, якщо треба
 
-  saveDB();
+  await usersCollection.updateOne({ discordId }, { $set: update });
+  const user = await usersCollection.findOne({ discordId });
   res.json({ success: true, user });
 });
 
 setInterval(() => {
   const now = new Date();
   console.log("⏰ Checking for hourly income accrual...");
-  for (const userId in users) {
-    if (users[userId].incomePerHour > 0) {
-      users[userId].balance += users[userId].incomePerHour;
-      console.log(`> User ${userId} received ${users[userId].incomePerHour} coins.`);
+  usersCollection.find().forEach(async (user) => {
+    if (user.incomePerHour > 0) {
+      await usersCollection.updateOne(
+        { discordId: user.discordId },
+        { $inc: { balance: user.incomePerHour } }
+      );
+      console.log(`> User ${user.discordId} received ${user.incomePerHour} coins.`);
     }
-  }
+  });
   console.log("✅ Hourly income check complete.");
 }, 60 * 60 * 1000);
 
