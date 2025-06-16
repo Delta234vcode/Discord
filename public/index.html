@@ -1,4 +1,4 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8" />
@@ -1876,6 +1876,64 @@ function initDiscordLogin() {
     // setInterval(applyPassiveIncome, 3600000); // Перенесено в initializeGame, щоб уникнути багаторазового запуску
     preInitialize();
 
+    // === Додаємо функції для роботи з сервером ===
+    async function loadUserData() {
+      const response = await fetch('/user', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        coins = data.balance || 0;
+        ownedCapsules = data.ownedCapsules || [];
+        incomePerHour = data.incomePerHour || 0;
+        // Додай інші поля, якщо треба
+        updateUIDisplay();
+        renderCapsules();
+      } else {
+        showCustomMessage('User not found. Please log in again.', 3000);
+      }
+    }
+
+    async function saveUserData() {
+      await fetch('/update', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          coins: coins,
+          incomePerHour: incomePerHour,
+          ownedCapsules: ownedCapsules
+          // Додай інші поля, якщо треба
+        })
+      });
+    }
+
+    // === Викликаємо loadUserData після авторизації ===
+    async function afterDiscordLogin() {
+      await loadUserData();
+      // Можна додати додаткову ініціалізацію гри тут
+    }
+
+    // === Викликаємо saveUserData після змін прогресу ===
+    // handleTapInteraction
+    const originalHandleTapInteraction = handleTapInteraction;
+    handleTapInteraction = async function(...args) {
+      await originalHandleTapInteraction.apply(this, args);
+      await saveUserData();
+    };
+
+    // updateInventoryDisplay
+    const originalUpdateInventoryDisplay = updateInventoryDisplay;
+    updateInventoryDisplay = async function(...args) {
+      await originalUpdateInventoryDisplay.apply(this, args);
+      await saveUserData();
+    };
+
+    // === Викликаємо afterDiscordLogin після успішної авторизації ===
+    // Додай у відповідне місце після авторизації через Discord:
+    // await afterDiscordLogin();
+    // ... існуючий код ...
   </script>
 </body>
 </html>
