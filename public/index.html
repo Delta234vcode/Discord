@@ -2,10 +2,10 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <title>PhoneTap</title>
     <!-- CSS-стилі: шрифти, кольори, фон, піксельний шрифт тощо -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script> <!-- Included for utility classes if needed, though most styles are custom -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -18,57 +18,39 @@
             --border-color: var(--electric-blue);
         }
 
-        /* Глобальні стилі для мобільної адаптації */
-        html, body {
-            height: 100%;
-            max-width: 100%;
-            overflow-x: hidden;
-            touch-action: manipulation;
-            background-color: var(--dark-bg);
-        }
-
         body {
             font-family: 'Inter', sans-serif;
             background: url('https://i.postimg.cc/8P34RGJT/Chat-GPT-Image-26-2025-19-50-54.png') center center no-repeat;
             background-size: cover;
             background-attachment: fixed;
+            background-color: var(--dark-bg);
             color: var(--text-color);
+            overscroll-behavior-y: contain;
+            min-height: 100vh;
             margin: 0;
         }
 
-        img, button {
-            max-width: 100%;
-            height: auto;
-            user-select: none;
-            -webkit-user-drag: none;
-            touch-action: manipulation;
-        }
-
-        .app-container, .login-container {
-            width: 100%;
+        .app-container {
             max-width: 420px;
-            height: 100dvh;
+            min-height: 100vh;
             margin: 0 auto;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
             background-color: var(--container-bg);
             backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
             box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
             border: 1px solid rgba(0, 255, 255, 0.2);
-            padding-bottom: 85px; /* Запас для нижньої навігації */
         }
 
         .hud {
             background-color: rgba(10, 10, 20, 0.9);
             padding: 10px 15px;
             display: flex;
-            justify-content: space-around;
+            justify-content: space-around; /* Changed to space-around for 2 items */
             align-items: center;
-            font-size: 0.9rem;
+            font-size: 0.9rem; /* Slightly larger font for clarity */
             border-bottom: 1px solid var(--border-color);
             font-family: 'Share Tech Mono', monospace;
-            flex-shrink: 0;
         }
         .hud-item {
             background-color: rgba(0, 255, 255, 0.1);
@@ -89,19 +71,22 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            flex-grow: 1;
-            padding: 5px 10px;
-            min-height: 280px;
+            margin: 5px 0; 
+            padding-top: 10px; 
+            padding-bottom: 5px;
+            flex-grow: 1; 
+            min-height: 300px; 
         }
 
         .tap-capsule-img {
-            width: 100%;
-            max-width: 360px;
+            width: 360px; 
             height: auto;
             max-height: 360px; 
             transition: transform 0.1s ease-in-out, filter 0.2s;
             animation: glowPulsePunk 2.5s infinite ease-in-out;
             cursor: pointer;
+            user-select: none;
+            -webkit-user-drag: none;
         }
         .tap-capsule-img:active {
             transform: scale(0.95) rotate(2deg);
@@ -168,27 +153,23 @@
             margin-top: 4px;
             font-family: 'Share Tech Mono', monospace;
         }
-        
+
         .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            max-width: 420px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            z-index: 1000;
             display: flex;
             justify-content: space-around;
             background-color: rgba(10, 10, 20, 0.95);
+            padding: 16px 0; 
             border-top: 1px solid var(--border-color);
+            width: 100%;
+            z-index: 100;
         }
 
         .nav-button {
             background-color: transparent;
             color: var(--electric-blue);
             border: 1px solid transparent;
-            padding: 16px 8px;
-            font-size: 1rem;
+            padding: 14px 10px; 
+            font-size: 1.2rem; 
             font-family: 'Share Tech Mono', monospace;
             font-weight: 600;
             cursor: pointer;
@@ -212,9 +193,9 @@
             box-shadow: 0 0 10px var(--electric-blue);
         }
 
-        /* Оновлені стилі для контейнера вкладок */
         .tab-content-wrapper {
             flex-grow: 1;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
             padding: 15px;
@@ -369,7 +350,7 @@
 
         #messageBox {
             position: fixed;
-            bottom: 95px;
+            bottom: 75px; 
             left: 50%;
             transform: translateX(-50%);
             background-color: var(--neon-pink);
@@ -379,7 +360,7 @@
             border-radius: 2px;
             border: 1px solid var(--dark-bg);
             box-shadow: 0 0 12px var(--neon-pink); 
-            z-index: 2000;
+            z-index: 1000;
             opacity: 0;
             transition: opacity 0.3s ease, transform 0.3s ease;
             pointer-events: none;
@@ -391,6 +372,7 @@
             pointer-events: auto;
         }
 
+        /* Capsule Drop Modal CSS - New Animation Logic */
         #capsuleDropModal.modal {
             display: none;
             position: fixed;
@@ -479,17 +461,134 @@
             box-shadow: 0 0 20px var(--neon-pink), 0 0 12px var(--electric-blue); 
             transform: translateY(-1px) scale(1.02); 
         }
+
+        /* Discord Login Styles */
+        .discord-login-section {
+            background-color: rgba(30, 30, 40, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .discord-login-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--neon-pink);
+        }
+        .discord-login-subtitle {
+            font-size: 1rem;
+            color: var(--text-color);
+        }
+        .discord-login-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #5865F2;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .discord-login-button:hover {
+            background-color: #4752C4;
+        }
+        .discord-login-note {
+            font-size: 0.8rem;
+            color: var(--text-color);
+            margin-top: 10px;
+        }
+
+        /* User Info Styles */
+        .user-info-section {
+            background-color: rgba(30, 30, 40, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .user-info-content {
+            display: flex;
+            align-items: center;
+        }
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 15px;
+        }
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .user-details {
+            flex-grow: 1;
+        }
+        .user-username {
+            font-size: 1.2rem;
+            color: var(--neon-pink);
+        }
+        .user-discord-id {
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+        .logout-button {
+            background-color: #FF0000;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .logout-button:hover {
+            background-color: #CC0000;
+        }
     </style>
 </head>
-<body>
+<body class="overflow-hidden">
 
     <div id="languageModal">
         <h2>CHOOSE YOUR LANGUAGE / ВЫБЕРИТЕ ЯЗЫК</h2>
         <button class="language-button" data-lang="en">ENGLISH</button>
         <button class="language-button" data-lang="ru">РУССКИЙ</button>
     </div>
-    
-    <main class="app-container" style="display: none;">
+
+    <div class="app-container" style="display: none;">
+        <!-- Discord Login Section -->
+        <div id="discordLoginSection" class="discord-login-section">
+            <div class="discord-login-content">
+                <h2 class="discord-login-title">PHONETAP AGENT LOGIN</h2>
+                <p class="discord-login-subtitle">Authenticate with Discord to access the game</p>
+                <button id="discordLoginButton" class="discord-login-button">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
+                    </svg>
+                    Login with Discord
+                </button>
+                <p class="discord-login-note">Your game progress will be saved to your Discord account</p>
+            </div>
+        </div>
+
+        <!-- User Info Section (hidden by default) -->
+        <div id="userInfoSection" class="user-info-section hidden">
+            <div class="user-info-content">
+                <div class="user-avatar">
+                    <img id="userAvatar" src="" alt="User Avatar" />
+                </div>
+                <div class="user-details">
+                    <h3 id="userUsername" class="user-username">Loading...</h3>
+                    <p id="userDiscordId" class="user-discord-id">ID: Loading...</p>
+                </div>
+                <button id="logoutButton" class="logout-button">Logout</button>
+            </div>
+        </div>
+
         <div class="hud">
             <div class="hud-item energy">
                 ⚡ <span id="energyValue" data-translate-value-target>200</span>/<span id="maxEnergyDisplay" data-translate-value-target>200</span>
@@ -499,19 +598,18 @@
             </div>
         </div>
 
-        <!-- Контейнер для ВСІХ вкладок -->
-        <div class="tab-content-wrapper">
+        <div class="tap-capsule-container" id="tapCapsuleElementContainer"> 
+            <img id="mainTapCapsuleImage" class="tap-capsule-img" src="https://res.cloudinary.com/daykr7ioq/image/upload/v1749155816/ChatGPT_Image_26_%D1%82%D1%80%D0%B0%D0%B2._2025_%D1%80._18_53_50_z9nmz4.png" alt="Main Capsule"
+                 onerror="this.onerror=null;this.src='https://placehold.co/360x360/0A0A1A/FF00FF?text=MAIN_CAPSULE_ERROR&font=Share+Tech+Mono';this.alt='Error loading main capsule image';" />
+            <!-- Оновлений елемент для пасивного доходу -->
+            <div id="passiveIncomeDisplay" class="passive-display">+0 COINS/HOUR</div>
+            <div class="tap-hint" data-translate-key="tap_hint_text">TAP THE VOID CAPSULE!</div>
+            <div id="totalTapDisplay" class="tap-total">Total tapped: 0 coins</div> <!-- Новий елемент для лічильника -->
+            <div class="cooldown-timer" id="cooldownTimerDisplay"></div>
+        </div>
 
-            <!-- Вкладка TAP тепер містить капсулу -->
+        <div class="tab-content-wrapper">
             <div id="tapTab" class="tab-content active">
-                <div class="tap-capsule-container" id="tapCapsuleElementContainer"> 
-                    <img id="mainTapCapsuleImage" class="tap-capsule-img" src="https://res.cloudinary.com/daykr7ioq/image/upload/v1749155816/ChatGPT_Image_26_%D1%82%D1%80%D0%B0%D0%B2._2025_%D1%80._18_53_50_z9nmz4.png" alt="Main Capsule"
-                         onerror="this.onerror=null;this.src='https://placehold.co/360x360/0A0A1A/FF00FF?text=MAIN_CAPSULE_ERROR&font=Share+Tech+Mono';this.alt='Error loading main capsule image';" />
-                    <div id="passiveIncomeDisplay" class="passive-display">+0 COINS/HOUR</div>
-                    <div class="tap-hint" data-translate-key="tap_hint_text">TAP THE VOID CAPSULE!</div>
-                    <div id="totalTapDisplay" class="tap-total">Total tapped: 0 coins</div>
-                    <div class="cooldown-timer" id="cooldownTimerDisplay"></div>
-                </div>
             </div>
 
             <div id="vaultTab" class="tab-content">
@@ -538,7 +636,7 @@
                 <h2 data-translate-key="network_title">INVITE FRIENDS</h2>
                 <div class="invite-block">
                     <label data-translate-key="your_invite_code_label">Your Invite Code:</label>
-                    <div class="invite-link-container" style="display: flex;">
+                    <div class="invite-link-container">
                         <input type="text" id="playerInviteCodeDisplay" value="LOADING..." readonly />
                         <button id="copyInviteCodeButton" data-translate-key="copy_button_id">COPY ID</button>
                     </div>
@@ -587,8 +685,9 @@
             <button class="nav-button" data-tab="inviteTab" data-translate-key="nav_network">NETWORK</button>
             <button class="nav-button" data-tab="tasksTab" data-translate-key="nav_tasks">TASKS</button>
         </nav>
-    </main>
+    </div>
 
+    <!-- HTML модального вікна для випадіння капсули -->
     <div id="capsuleDropModal" class="modal hidden">
         <div class="capsule-drop-content"> 
             <p id="droppedCapsuleInfo"></p>
@@ -605,7 +704,7 @@
     // ================================
     // 1. ФУНКЦІЇ ДЛЯ РОБОТИ З БЕКЕНДОМ
     // ================================
-    const API_BASE_URL = window.location.origin;
+    const API_BASE_URL = window.location.origin; // Виправлено URL для роботи на будь-якому хостингу
 
     async function loadOrCreatePlayer(discordId) {
       console.log(`[Backend] Attempting to load/create player with discordId: ${discordId}`);
@@ -647,6 +746,7 @@
       if (fieldsToUpdate.coins !== undefined) supportedFields.coins = fieldsToUpdate.coins;
       if (fieldsToUpdate.incomePerHour !== undefined) supportedFields.incomePerHour = fieldsToUpdate.incomePerHour;
       if (fieldsToUpdate.referral !== undefined) supportedFields.referral = fieldsToUpdate.referral;
+      // Припускаємо, що бекенд може приймати `capsules` для збереження
       if (fieldsToUpdate.capsules !== undefined) supportedFields.capsules = fieldsToUpdate.capsules;
 
 
@@ -685,7 +785,7 @@
     }
 
     // ================================
-    // 2. ГЛОБАЛЬНІ ЗМІННІ
+    // 2. ОГОЛОШЕННЯ ГЛОБАЛЬНИХ ЗМІННИХ
     // ================================
     let taps = 0;
     let coins = 0;
@@ -698,15 +798,18 @@
     let nextTapAvailableTime = null;
     let cooldownIntervalId = null;
     let ownedCapsules = []; 
-    let tapCoinsTotal = 0;
+    let tapCoinsTotal = 0; // Нова змінна для підрахунку натапаних монет
     let currentDailyClaimStep = 0;
     let currentLocale = 'en';
     let currentActiveTab = "tapTab";
+
 
     // DOM-елементи
     const energyValueElement = document.getElementById("energyValue");
     const maxEnergyDisplayElement = document.getElementById("maxEnergyDisplay");
     const coinsDisplayElement = document.getElementById("coinsDisplay");
+    const fuelValueElement = document.getElementById("fuelValue");
+    const fuelMaxDisplayElement = document.getElementById("fuelMaxDisplay");
     const passiveIncomeDisplayElement = document.getElementById("passiveIncomeDisplay"); 
     const totalTapDisplayElement = document.getElementById("totalTapDisplay"); 
     const cooldownTimerDisplayElement = document.getElementById("cooldownTimerDisplay");
@@ -727,6 +830,7 @@
     const capsuleDropModalElement = document.getElementById('capsuleDropModal');
     const droppedCapsuleImageElement = document.getElementById('droppedCapsuleImage'); 
     const droppedCapsuleInfoElement = document.getElementById('droppedCapsuleInfo');
+    const droppedCapsuleQuoteElement = document.getElementById('droppedCapsuleQuote');
     const droppedCapsuleBonusElement = document.getElementById('droppedCapsuleBonus');
     const droppedCapsuleChanceElement = document.getElementById('droppedCapsuleChance'); 
     const closeDropModalButtonElement = document.getElementById('closeDropModalButton');
@@ -736,17 +840,124 @@
     const languageModalElement = document.getElementById('languageModal');
     const appContainerElement = document.querySelector('.app-container');
 
+    // Discord Login DOM elements
+    const discordLoginSectionElement = document.getElementById('discordLoginSection');
+    const discordLoginButtonElement = document.getElementById('discordLoginButton');
+    const userInfoSectionElement = document.getElementById('userInfoSection');
+    const userAvatarElement = document.getElementById('userAvatar');
+    const userUsernameElement = document.getElementById('userUsername');
+    const userDiscordIdElement = document.getElementById('userDiscordId');
+    const logoutButtonElement = document.getElementById('logoutButton');
+
+    // Discord authentication state
+    let isDiscordAuthenticated = false;
+    let discordUserData = null;
+
+    // ================================
+    // 3. DISCORD AUTHENTICATION FUNCTIONS
+    // ================================
+    function checkDiscordAuth() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const discordId = urlParams.get('discord_id');
+        const username = urlParams.get('username');
+        
+        if (discordId && username) {
+            // User just logged in via Discord
+            discordUserData = {
+                id: discordId,
+                username: decodeURIComponent(username),
+                avatar: `https://cdn.discordapp.com/avatars/${discordId}/${discordId}.png`
+            };
+            
+            // Save Discord auth data
+            localStorage.setItem('phonetap_discord_auth', JSON.stringify(discordUserData));
+            
+            // Clean URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            // Set player UID to Discord ID
+            playerUID = discordId;
+            localStorage.setItem("playerUID_phonetap", playerUID);
+            
+            isDiscordAuthenticated = true;
+            showUserInfo();
+            return true;
+        } else {
+            // Check if user was previously authenticated
+            const savedAuth = localStorage.getItem('phonetap_discord_auth');
+            if (savedAuth) {
+                try {
+                    discordUserData = JSON.parse(savedAuth);
+                    playerUID = discordUserData.id;
+                    isDiscordAuthenticated = true;
+                    showUserInfo();
+                    return true;
+                } catch (e) {
+                    console.error('Error parsing saved Discord auth:', e);
+                    localStorage.removeItem('phonetap_discord_auth');
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    function showUserInfo() {
+        if (discordLoginSectionElement) discordLoginSectionElement.classList.add('hidden');
+        if (userInfoSectionElement) userInfoSectionElement.classList.remove('hidden');
+        
+        if (userAvatarElement) userAvatarElement.src = discordUserData.avatar;
+        if (userUsernameElement) userUsernameElement.textContent = discordUserData.username;
+        if (userDiscordIdElement) userDiscordIdElement.textContent = `ID: ${discordUserData.id}`;
+    }
+
+    function showLoginForm() {
+        if (discordLoginSectionElement) discordLoginSectionElement.classList.remove('hidden');
+        if (userInfoSectionElement) userInfoSectionElement.classList.add('hidden');
+    }
+
+    function logout() {
+        localStorage.removeItem('phonetap_discord_auth');
+        localStorage.removeItem('playerUID_phonetap');
+        isDiscordAuthenticated = false;
+        discordUserData = null;
+        playerUID = "";
+        
+        showLoginForm();
+        showCustomMessage('Logged out successfully', 3000);
+    }
+
+    function initDiscordLogin() {
+        if (discordLoginButtonElement) {
+            discordLoginButtonElement.addEventListener('click', () => {
+                window.location.href = `${API_BASE_URL}/auth/discord`;
+            });
+        }
+        
+        if (logoutButtonElement) {
+            logoutButtonElement.addEventListener('click', logout);
+        }
+    }
+
     // Константи гри
     const MAX_TAPS_BEFORE_COOLDOWN = 200;
     const COOLDOWN_MS = 3 * 60 * 60 * 1000;
     const capsuleBonuses = { silver: 2, gold: 6, diamond: 20, discord: 40 };
-    const capsuleDropChances = { discord: 5, diamond: 10, gold: 35, silver: 50 }; 
+    // Оновлені шанси випадіння капсул
+    const capsuleDropChances = { 
+        discord: 5,  // 0-4.99...
+        diamond: 10, // 5-14.99...
+        gold: 35,    // 15-49.99...
+        silver: 50   // 50-99.99...
+    }; 
+    
     const capsuleImageMap = { 
       silver: 'https://res.cloudinary.com/daykr7ioq/image/upload/v1749155921/ChatGPT_Image_26_%D1%82%D1%80%D0%B0%D0%B2._2025_%D1%80._18_54_41_uo5bpq.png',
       gold: 'https://res.cloudinary.com/daykr7ioq/image/upload/v1749155782/ChatGPT_Image_26_%D1%82%D1%80%D0%B0%D0%B2._2025_%D1%80._18_51_24_zjlhr6.png',
       diamond: 'https://res.cloudinary.com/daykr7ioq/image/upload/v1749155864/ChatGPT_Image_26_%D1%82%D1%80%D0%B0%D0%B2._2025_%D1%80._18_54_36_tfkrbs.png',
       discord: 'https://res.cloudinary.com/daykr7ioq/image/upload/v1749155751/ChatGPT_Image_26_%D1%82%D1%80%D0%B0%D0%B2._2025_%D1%80._18_48_09_klqszw.png'
     };
+
     const dailyRewards = [
         { day: 1, type: 'coins', value: 125 }, { day: 2, type: 'coins', value: 250 },
         { day: 3, type: 'coins', value: 375 }, { day: 4, type: 'coins', value: 500 },
@@ -759,117 +970,54 @@
 
     const translations = {
         en: {
+            "energy_header": "Energy", "coins_header": "Coins", "fuel_header": "Fuel",
             "coins_per_hour_suffix_short": "COINS/HOUR", "tap_hint_text": "TAP THE VOID CAPSULE!",
-            "cooldown_timer_prefix": "COOLDOWN", "vault_title": "VAULT", "passive_income_label": "PASSIVE STREAM:",
-            "no_capsules_message": "NO ARTIFACTS IN VAULT. KEEP TAPPING.", "coins_per_hour_suffix": "COINS/HR",
-            "passive_income_note": "Income stream auto-updates hourly.", "ranks_title": "RANKS",
-            "leaderboard_empty_message": "RANKINGS OFFLINE. BE THE FIRST.", "coins_suffix": "COINS",
-            "leaderboard_reset_note": "Rankings reset 00:00 UTC.", "network_title": "INVITE FRIENDS",
-            "your_invite_code_label": "Your Invite Code:", "copy_button_id": "COPY ID",
-            "activated_referrals_label": "Activated Referrals:", "referral_enter_code_label": "Enter Referral Code:",
-            "confirm_button": "CONFIRM", "referral_enter_placeholder": "ENTER CODE",
-            "referral_status_success_template": "Referred by: {value}",
-            "referral_status_error_own_code": "Cannot use your own code.",
-            "referral_status_error_already_referred": "Already referred.",
-            "referral_status_error_enter_code": "Please enter a code.", "referral_success_message": "Success! Referral confirmed.",
-            "your_rewards_label_referrer": "YOUR REWARDS (as Referrer):",
-            "referrer_bonus_manual_code_info": "💸 +200 COINS // For you // When your friend enters your code.",
-            "referrer_bonus_200_taps_info": "💸 +100 COINS // For you // When your friend makes 200 taps.",
-            "referrer_bonus_10_percent_info": "⚡ +10% of their earnings // Forever.",
-            "your_rewards_label_referee": "YOUR BONUS (as Referee):",
-            "referee_bonus_url_info": "🎁 +25 COINS // Joining via referral link!",
-            "referee_bonus_manual_code_info": "🎁 +100 COINS // Entering a referral code!",
-            "backend_needed_note": "(Backend logic required for this)",
-            "backend_needed_note_2": "(Backend logic required)",
-            "backend_needed_note_3": "(Backend logic required)", "tasks_title": "TASKS",
-            "tasks_subtitle_daily_cache": "DAILY CACHE", "daily_cache_status_checking": "SCANNING CACHE...",
-            "daily_cache_button_claim_template": "ACCESS CACHE (DAY {day})",
-            "daily_cache_button_claimed_template": "ACCESSED (DAY {day})", "daily_cache_button_claimed_na": "ACCESSED",
-            "daily_claim": "Day", "daily_cache_available_message_template": "DAILY CACHE (DAY {day}) AVAILABLE! ({reward_text})",
-            "daily_cache_claimed_today_message": "DAILY CACHE ACCESSED. COME BACK TOMORROW.",
-            "capsule_drop_title_template_raw": "ARTIFACT: {type}!",
-            "capsule_drop_bonus_template_raw": "+{value} C/HR",
-            "capsule_drop_chance_template": "Drop Chance: {chance}%", "capsule_drop_close_button": "LOG IT!",
-            "message_tap_limit_cooldown_template": "TAP LIMIT! COOLDOWN: {hours}H.",
-            "message_energy_recharged": "ENERGY RECHARGED!",
-            "message_energy_depleted_wait_template": "NO ENERGY! WAIT {minutes} MIN.",
-            "message_energy_depleted_recharging": "NO ENERGY! RECHARGING...",
-            "message_passive_income_received_template": "+{value} COINS! (PASSIVE INCOME)",
-            "message_referral_bonus_url_template": "REFERRAL BONUS (LINK): +25 COINS! (Ref: {value})",
-            "message_referral_bonus_manual_template": "REFERRAL BONUS (CODE): +100 COINS! (Ref: {value})",
+            "cooldown_timer_prefix": "COOLDOWN",
+            "vault_title": "VAULT", "passive_income_label": "PASSIVE STREAM:", "no_capsules_message": "NO ARTIFACTS IN VAULT. KEEP TAPPING.", "coins_per_hour_suffix": "COINS/HR", "passive_income_note": "Income stream auto-updates hourly.",
+            "ranks_title": "RANKS", "leaderboard_empty_message": "RANKINGS OFFLINE. BE THE FIRST.", "coins_suffix": "COINS", "leaderboard_reset_note": "Rankings reset 00:00 UTC.",
+            "network_title": "INVITE FRIENDS", "your_invite_code_label": "Your Invite Code:", "copy_button_id": "COPY ID", "activated_referrals_label": "Activated Referrals:", "referral_enter_code_label": "Enter Referral Code:", "confirm_button": "CONFIRM", "referral_enter_placeholder": "ENTER CODE",
+            "referral_status_success_template": "Referred by: {value}", "referral_status_error_own_code": "Cannot use your own code.", "referral_status_error_already_referred": "Already referred.", "referral_status_error_enter_code": "Please enter a code.", "referral_success_message": "Success! Referral confirmed.",
+            "your_rewards_label_referrer": "YOUR REWARDS (as Referrer):", "referrer_bonus_manual_code_info": "💸 +200 COINS // For you // When your friend enters your code.", "referrer_bonus_200_taps_info": "💸 +100 COINS // For you // When your friend makes 200 taps.", "referrer_bonus_10_percent_info": "⚡ +10% of their earnings // Forever.",
+            "your_rewards_label_referee": "YOUR BONUS (as Referee):", "referee_bonus_url_info": "🎁 +25 COINS // Joining via referral link!", "referee_bonus_manual_code_info": "🎁 +100 COINS // Entering a referral code!",
+            "backend_needed_note":"(Backend logic required for this)", "backend_needed_note_2":"(Backend logic required)", "backend_needed_note_3":"(Backend logic required)",
+            "tasks_title": "TASKS", "tasks_subtitle_daily_cache": "DAILY CACHE", "daily_cache_status_checking": "SCANNING CACHE...", "daily_cache_button_claim_template": "ACCESS CACHE (DAY {day})", "daily_cache_button_claimed_template": "ACCESSED (DAY {day})", "daily_cache_button_claimed_na": "ACCESSED", "daily_claim": "Day",
+            "daily_cache_available_message_template": "DAILY CACHE (DAY {day}) AVAILABLE! ({reward_text})", "daily_cache_claimed_today_message": "DAILY CACHE ACCESSED. COME BACK TOMORROW.",
+            "capsule_drop_title_template_raw": "ARTIFACT: {type}!", "capsule_drop_quote_default": "A mysterious energy emanates...", "capsule_drop_bonus_template_raw": "+{value} C/HR", "capsule_drop_chance_template": "Drop Chance: {chance}%", "capsule_drop_close_button": "LOG IT!",
+            "message_tap_limit_cooldown_template": "TAP LIMIT! COOLDOWN: {hours}H.", "message_energy_recharged": "ENERGY RECHARGED!", "message_energy_depleted_wait_template": "NO ENERGY! WAIT {minutes} MIN.", "message_energy_depleted_recharging": "NO ENERGY! RECHARGING...",
+            "message_passive_income_received_template": "+{value} COINS! (PASSIVE INCOME)", "message_referral_bonus_url_template": "REFERRAL BONUS (LINK): +25 COINS! (Ref: {value})", "message_referral_bonus_manual_template": "REFERRAL BONUS (CODE): +100 COINS! (Ref: {value})",
             "message_referral_milestone_referrer_template": "MILESTONE! Referrer {value} gets 100 COINS.",
-            "message_link_copied": "INVITE CODE COPIED!", "message_link_copied_fallback": "CODE COPIED (Fallback)",
-            "message_link_copy_failed": "COPY FAILED. TRY MANUALLY.",
-            "message_daily_reward_claimed_already": "DAILY CACHE ALREADY CLAIMED TODAY!",
-            "message_daily_reward_coins_template": "REWARD: +{value} COINS! (DAY {day})",
-            "message_daily_reward_capsule_template": "REWARD: {value} CAPSULE! (DAY {day})",
-            "message_leaderboard_reset": "LEADERBOARD RESET!",
-            "message_audio_load_error_template": "AUDIO ERROR: {soundName} (Load)",
-            "message_audio_play_error_template": "AUDIO ERROR: {soundName} (Play)",
-            "message_storage_error": "STORAGE ERROR. GAME NOT SAVED.",
-            "message_generic_error": "An error occurred. Please try again.", "nav_tap": "TAP", "nav_vault": "VAULT",
-            "nav_ranks": "RANKS", "nav_network": "NETWORK", "nav_tasks": "TASKS", "capsule_silver": "SILVER",
-            "capsule_gold": "GOLD", "capsule_diamond": "DIAMOND", "capsule_discord": "DISCORD",
-            "daily_reward_text_coins_template": "+{value} Coins",
-            "daily_reward_text_capsule_template": "🎁 {value} Capsule",
-            "daily_reward_new_cycle_template": "+{value} Coins (New Cycle)"
+            "message_link_copied": "INVITE CODE COPIED!", "message_link_copied_fallback": "CODE COPIED (Fallback)", "message_link_copy_failed": "COPY FAILED. TRY MANUALLY.",
+            "message_daily_reward_claimed_already": "DAILY CACHE ALREADY CLAIMED TODAY!", "message_daily_reward_coins_template": "REWARD: +{value} COINS! (DAY {day})", "message_daily_reward_capsule_template": "REWARD: {value} CAPSULE! (DAY {day})",
+            "message_leaderboard_reset": "LEADERBOARD RESET!", "message_audio_load_error_template": "AUDIO ERROR: {soundName} (Load)", "message_audio_play_error_template": "AUDIO ERROR: {soundName} (Play)",
+            "message_storage_error": "STORAGE ERROR. GAME NOT SAVED.", "message_generic_error": "An error occurred. Please try again.",
+            "nav_tap": "TAP", "nav_vault": "VAULT", "nav_ranks": "RANKS", "nav_network": "NETWORK", "nav_tasks": "TASKS",
+            "capsule_silver": "SILVER", "capsule_gold": "GOLD", "capsule_diamond": "DIAMOND", "capsule_discord": "DISCORD",
+            "daily_reward_text_coins_template": "+{value} Coins", "daily_reward_text_capsule_template": "🎁 {value} Capsule", "daily_reward_new_cycle_template": "+{value} Coins (New Cycle)"
         },
         ru: {
+            "energy_header": "Энергия", "coins_header": "Монеты", "fuel_header": "Топливо",
             "coins_per_hour_suffix_short": "МОНЕТ/ЧАС", "tap_hint_text": "ТАПАЙ ПО КАПСУЛЕ!",
-            "cooldown_timer_prefix": "КУЛДАУН", "vault_title": "ХРАНИЛИЩЕ",
-            "passive_income_label": "ПАССИВНЫЙ ДОХОД:", "no_capsules_message": "КАПСУЛ НЕТ. ПРОДОЛЖАЙ ТАПАТЬ.",
-            "coins_per_hour_suffix": "МОНЕТ/ЧАС", "passive_income_note": "Доход обновляется ежечасно.",
-            "ranks_title": "РЕЙТИНГИ", "leaderboard_empty_message": "РЕЙТИНГИ ПУСТЫ. БУДЬ ПЕРВЫМ.",
-            "coins_suffix": "МОНЕТ", "leaderboard_reset_note": "Рейтинги сбрасываются в 00:00 UTC.",
-            "network_title": "ДРУЗЬЯ", "your_invite_code_label": "Твой код приглашения:", "copy_button_id": "КОПИРОВАТЬ",
-            "activated_referrals_label": "Активировано рефералов:",
-            "referral_enter_code_label": "Введи код приглашения:", "confirm_button": "ПОДТВЕРДИТЬ",
-            "referral_enter_placeholder": "ВВЕДИ КОД", "referral_status_success_template": "Пригласил: {value}",
-            "referral_status_error_own_code": "Нельзя использовать свой код.",
-            "referral_status_error_already_referred": "Уже приглашен.",
-            "referral_status_error_enter_code": "Введи код.", "referral_success_message": "Успех! Реферал подтвержден.",
-            "your_rewards_label_referrer": "ТВОИ НАГРАДЫ (Пригласившему):",
-            "referrer_bonus_manual_code_info": "💸 +200 МОНЕТ // Тебе // Когда друг введет твой код.",
-            "referrer_bonus_200_taps_info": "💸 +100 МОНЕТ // Тебе // Когда друг сделает 200 тапов.",
-            "referrer_bonus_10_percent_info": "⚡ +10% от их дохода // Навсегда.",
-            "your_rewards_label_referee": "ТВОЙ БОНУС (Приглашенному):",
-            "referee_bonus_url_info": "🎁 +25 МОНЕТ // За переход по ссылке!",
-            "referee_bonus_manual_code_info": "🎁 +100 МОНЕТ // За ввод кода!",
-            "backend_needed_note": "(Требуется логика на бэкенде)",
-            "backend_needed_note_2": "(Требуется логика на бэкенде)",
-            "backend_needed_note_3": "(Требуется логика на бэкенде)", "tasks_title": "ЗАДАНИЯ",
-            "tasks_subtitle_daily_cache": "ЕЖЕДНЕВНЫЙ КЕШ", "daily_cache_status_checking": "ПРОВЕРКА КЕША...",
-            "daily_cache_button_claim_template": "ЗАБРАТЬ КЕШ (ДЕНЬ {day})",
-            "daily_cache_button_claimed_template": "ПОЛУЧЕНО (ДЕНЬ {day})", "daily_cache_button_claimed_na": "ПОЛУЧЕНО",
-            "daily_claim": "День", "daily_cache_available_message_template": "КЕШ (ДЕНЬ {day}) ДОСТУПЕН! ({reward_text})",
-            "daily_cache_claimed_today_message": "КЕШ ПОЛУЧЕН. ЗАХОДИ ЗАВТРА.",
-            "capsule_drop_title_template_raw": "АРТЕФАКТ: {type}!",
-            "capsule_drop_bonus_template_raw": "+{value} М/ЧАС",
-            "capsule_drop_chance_template": "Шанс выпадения: {chance}%", "capsule_drop_close_button": "ОК!",
-            "message_tap_limit_cooldown_template": "ЛИМИТ ТАПОВ! КУЛДАУН: {hours}Ч.",
-            "message_energy_recharged": "ЭНЕРГИЯ ВОССТАНОВЛЕНА!",
-            "message_energy_depleted_wait_template": "НЕТ ЭНЕРГИИ! ЖДИ {minutes} МИН.",
-            "message_energy_depleted_recharging": "НЕТ ЭНЕРГИИ! ЗАРЯДКА...",
-            "message_passive_income_received_template": "+{value} МОНЕТ! (ПАССИВНЫЙ ДОХОД)",
-            "message_referral_bonus_url_template": "БОНУС (ССЫЛКА): +25 МОНЕТ! (Реф: {value})",
-            "message_referral_bonus_manual_template": "БОНУС (КОД): +100 МОНЕТ! (Реф: {value})",
+            "cooldown_timer_prefix": "КУЛДАУН",
+            "vault_title": "ХРАНИЛИЩЕ", "passive_income_label": "ПАССИВНЫЙ ДОХОД:", "no_capsules_message": "КАПСУЛ НЕТ. ПРОДОЛЖАЙ ТАПАТЬ.", "coins_per_hour_suffix": "МОНЕТ/ЧАС", "passive_income_note": "Доход обновляется ежечасно.",
+            "ranks_title": "РЕЙТИНГИ", "leaderboard_empty_message": "РЕЙТИНГИ ПУСТЫ. БУДЬ ПЕРВЫМ.", "coins_suffix": "МОНЕТ", "leaderboard_reset_note": "Рейтинги сбрасываются в 00:00 UTC.",
+            "network_title": "ДРУЗЬЯ", "your_invite_code_label": "Твой код приглашения:", "copy_button_id": "КОПИРОВАТЬ", "activated_referrals_label": "Активировано рефералов:", "referral_enter_code_label": "Введи код приглашения:", "confirm_button": "ПОДТВЕРДИТЬ", "referral_enter_placeholder": "ВВЕДИ КОД",
+            "referral_status_success_template": "Пригласил: {value}", "referral_status_error_own_code": "Нельзя использовать свой код.", "referral_status_error_already_referred": "Уже приглашен.", "referral_status_error_enter_code": "Введи код.", "referral_success_message": "Успех! Реферал подтвержден.",
+            "your_rewards_label_referrer": "ТВОИ НАГРАДЫ (Пригласившему):", "referrer_bonus_manual_code_info": "💸 +200 МОНЕТ // Тебе // Когда друг введет твой код.", "referrer_bonus_200_taps_info": "💸 +100 МОНЕТ // Тебе // Когда друг сделает 200 тапов.", "referrer_bonus_10_percent_info": "⚡ +10% от их дохода // Навсегда.",
+            "your_rewards_label_referee": "ТВОЙ БОНУС (Приглашенному):", "referee_bonus_url_info": "🎁 +25 МОНЕТ // За переход по ссылке!", "referee_bonus_manual_code_info": "🎁 +100 МОНЕТ // За ввод кода!",
+            "backend_needed_note":"(Требуется логика на бэкенде)", "backend_needed_note_2":"(Требуется логика на бэкенде)", "backend_needed_note_3":"(Требуется логика на бэкенде)",
+            "tasks_title": "ЗАДАНИЯ", "tasks_subtitle_daily_cache": "ЕЖЕДНЕВНЫЙ КЕШ", "daily_cache_status_checking": "ПРОВЕРКА КЕША...", "daily_cache_button_claim_template": "ЗАБРАТЬ КЕШ (ДЕНЬ {day})", "daily_cache_button_claimed_template": "ПОЛУЧЕНО (ДЕНЬ {day})", "daily_cache_button_claimed_na": "ПОЛУЧЕНО", "daily_claim": "День",
+            "daily_cache_available_message_template": "КЕШ (ДЕНЬ {day}) ДОСТУПЕН! ({reward_text})", "daily_cache_claimed_today_message": "КЕШ ПОЛУЧЕН. ЗАХОДИ ЗАВТРА.",
+            "capsule_drop_title_template_raw": "АРТЕФАКТ: {type}!", "capsule_drop_quote_default": "Таинственная энергия...", "capsule_drop_bonus_template_raw": "+{value} М/ЧАС", "capsule_drop_chance_template": "Шанс выпадения: {chance}%", "capsule_drop_close_button": "ОК!",
+            "message_tap_limit_cooldown_template": "ЛИМИТ ТАПОВ! КУЛДАУН: {hours}Ч.", "message_energy_recharged": "ЭНЕРГИЯ ВОССТАНОВЛЕНА!", "message_energy_depleted_wait_template": "НЕТ ЭНЕРГИИ! ЖДИ {minutes} МИН.", "message_energy_depleted_recharging": "НЕТ ЭНЕРГИИ! ЗАРЯДКА...",
+            "message_passive_income_received_template": "+{value} МОНЕТ! (ПАССИВНЫЙ ДОХОД)", "message_referral_bonus_url_template": "БОНУС (ССЫЛКА): +25 МОНЕТ! (Реф: {value})", "message_referral_bonus_manual_template": "БОНУС (КОД): +100 МОНЕТ! (Реф: {value})",
             "message_referral_milestone_referrer_template": "ВЕЛХА! Пригласивший {value} получает 100 МОНЕТ.",
-            "message_link_copied": "КОД ПРИГЛАШЕНИЯ СКОПИРОВАН!",
-            "message_link_copied_fallback": "КОД СКОПИРОВАН (Резерв)",
-            "message_link_copy_failed": "КОПИРОВАНИЕ НЕУДАЧНО. ПОПРОБУЙ ВРУЧНУЮ.",
-            "message_daily_reward_claimed_already": "ЕЖЕДНЕВНЫЙ КЕШ УЖЕ ПОЛУЧЕН!",
-            "message_daily_reward_coins_template": "НАГРАДА: +{value} МОНЕТ! (ДЕНЬ {day})",
-            "message_daily_reward_capsule_template": "НАГРАДА: {value} КАПСУЛА! (ДЕНЬ {day})",
-            "message_leaderboard_reset": "РЕЙТИНГИ СБРОШЕНЫ!",
-            "message_audio_load_error_template": "ОШИБКА АУДИО: {soundName} (Загрузка)",
-            "message_audio_play_error_template": "ОШИБКА АУДИО: {soundName} (Воспр.)",
-            "message_storage_error": "ОШИБКА ХРАНИЛИЩА. ИГРА НЕ СОХРАНЕНА.",
-            "message_generic_error": "Произошла ошибка. Попробуйте снова.", "nav_tap": "ТАП", "nav_vault": "СЕЙФ",
-            "nav_ranks": "РЕЙТИНГ", "nav_network": "ДРУЗЬЯ", "nav_tasks": "ЗАДАНИЯ",
-            "capsule_silver": "СЕРЕБРЯНАЯ", "capsule_gold": "ЗОЛОТАЯ", "capsule_diamond": "АЛМАЗНАЯ",
-            "capsule_discord": "ДИСКОРД", "daily_reward_text_coins_template": "+{value} Монет",
-            "daily_reward_text_capsule_template": "🎁 {value} Капсула",
-            "daily_reward_new_cycle_template": "+{value} Монет (Новый Цикл)"
+            "message_link_copied": "КОД ПРИГЛАШЕНИЯ СКОПИРОВАН!", "message_link_copied_fallback": "КОД СКОПИРОВАН (Резерв)", "message_link_copy_failed": "КОПИРОВАНИЕ НЕУДАЧНО. ПОПРОБУЙ ВРУЧНУЮ.",
+            "message_daily_reward_claimed_already": "ЕЖЕДНЕВНЫЙ КЕШ УЖЕ ПОЛУЧЕН!", "message_daily_reward_coins_template": "НАГРАДА: +{value} МОНЕТ! (ДЕНЬ {day})", "message_daily_reward_capsule_template": "НАГРАДА: {value} КАПСУЛА! (ДЕНЬ {day})",
+            "message_leaderboard_reset": "РЕЙТИНГИ СБРОШЕНЫ!", "message_audio_load_error_template": "ОШИБКА АУДИО: {soundName} (Загрузка)", "message_audio_play_error_template": "ОШИБКА АУДИО: {soundName} (Воспр.)",
+            "message_storage_error": "ОШИБКА ХРАНИЛИЩА. ИГРА НЕ СОХРАНЕНА.", "message_generic_error": "Произошла ошибка. Попробуйте снова.",
+            "nav_tap": "ТАП", "nav_vault": "СЕЙФ", "nav_ranks": "РЕЙТИНГ", "nav_network": "ДРУЗЬЯ", "nav_tasks": "ЗАДАНИЯ",
+            "capsule_silver": "СЕРЕБРЯНАЯ", "capsule_gold": "ЗОЛОТАЯ", "capsule_diamond": "АЛМАЗНАЯ", "capsule_discord": "ДИСКОРД",
+            "daily_reward_text_coins_template": "+{value} Монет", "daily_reward_text_capsule_template": "🎁 {value} Капсула", "daily_reward_new_cycle_template": "+{value} Монет (Новый Цикл)"
         }
     };
 
@@ -896,7 +1044,7 @@
             };
             return audio;
         } catch (e) {
-            console.warn(`Could not create Audio for ${soundName}.`, e);
+            console.warn(`Could not create Audio for ${soundName}. Sounds for it disabled.`, e);
             soundErrorFlags[soundName] = true;
             return { play: () => {}, pause: () => {}, currentTime: 0 };
         }
@@ -971,6 +1119,9 @@
         }
     }
 
+    // ==============================================
+    // 3. ФУНКЦІЯ initializeGame() (доповнена API)
+    // ==============================================
     async function initializeGame() {
       console.log("[Game] Initializing game...");
       loadGameState(); 
@@ -982,14 +1133,15 @@
         coins = serverData.balance !== undefined ? serverData.balance : coins;
         
         const serverCapsules = serverData.ownedCapsules || []; 
-        ownedCapsules = Array.from(new Set([...ownedCapsules, ...serverCapsules]));
+        const localCapsulesBeforeMerge = [...ownedCapsules]; 
+        ownedCapsules = Array.from(new Set([...localCapsulesBeforeMerge, ...serverCapsules]));
         
         let newIncomePerHour = calculatePassiveIncome();
         let shouldUpdateServerIncome = false;
 
         if (serverData.incomePerHour !== undefined) {
             if (serverData.incomePerHour !== newIncomePerHour) {
-                console.warn(`[Game] Server income (${serverData.incomePerHour}) differs from calculated (${newIncomePerHour}). Updating server.`);
+                console.warn(`[Game] Server income (${serverData.incomePerHour}) differs from calculated (${newIncomePerHour}) based on merged/server capsules. Will update server with calculated value.`);
                 incomePerHour = newIncomePerHour;
                 shouldUpdateServerIncome = true;
             } else {
@@ -1022,6 +1174,19 @@
       renderCapsules(); 
       updateLeaderboard();
 
+      if (currentActiveTab === "inviteTab") {
+            if(playerInviteCodeDisplayElement) playerInviteCodeDisplayElement.value = playerUID;
+            if(activatedReferralsCountDisplayElement) activatedReferralsCountDisplayElement.textContent = activatedReferralsCount;
+            const manuallyReferredBy = localStorage.getItem("manuallyReferredBy_phonetap");
+            if (manuallyReferredBy && enterReferralCodeSectionElement && referralStatusMessageElement) {
+              enterReferralCodeSectionElement.classList.add("hidden");
+              referralStatusMessageElement.textContent = t("referral_status_success_template", { value: manuallyReferredBy });
+            } else if (enterReferralCodeSectionElement && referralStatusMessageElement) {
+                enterReferralCodeSectionElement.classList.remove("hidden");
+                referralStatusMessageElement.textContent = "";
+            }
+      }
+
       scheduleLeaderboardReset();
       checkDailyClaimAvailability();
 
@@ -1035,7 +1200,8 @@
         showCustomMessage(t("message_energy_recharged"));
       }
       
-      setInterval(applyPassiveIncome, 3600000);
+      // Налаштування періодичного нарахування пасивного доходу
+      setInterval(applyPassiveIncome, 3600000); // 1 година
 
       saveGameState();
       console.log("[Game] Initialization complete.");
@@ -1043,15 +1209,19 @@
     }
     
     function renderCapsules() {
-      if (!capsulesContainerElement) return;
-      capsulesContainerElement.innerHTML = ""; 
+      const container = capsulesContainerElement; 
+      if (!container) {
+          console.warn("[Render] Capsules container (#capsulesContainer) not found!");
+          return;
+      }
+      container.innerHTML = ""; 
 
       if (ownedCapsules.length === 0) {
           const noCapsulesMsg = document.createElement('p');
           noCapsulesMsg.className = "text-gray-400 font-mono";
           noCapsulesMsg.setAttribute('data-translate-key', "no_capsules_message");
           noCapsulesMsg.textContent = t("no_capsules_message");
-          capsulesContainerElement.appendChild(noCapsulesMsg);
+          container.appendChild(noCapsulesMsg);
       } else {
           ownedCapsules.forEach(type => {
             if (capsuleImageMap[type]) { 
@@ -1063,19 +1233,27 @@
                     this.onerror=null; 
                     this.src='https://placehold.co/70x70/0A0A1A/FF00FF?text=ERR&font=Share+Tech+Mono'; 
                     this.alt=`Error loading ${type} icon`;
+                    console.warn(`Error loading capsule icon for type: ${type}, URL: ${capsuleImageMap[type]}`);
                 };
-                capsulesContainerElement.appendChild(img);
+                container.appendChild(img);
+            } else {
+                console.warn(`[Render] No image mapping found for capsule type: ${type}`);
             }
           });
       }
       const totalPassive = calculatePassiveIncome();
       if(passiveIncomeDisplayVaultElement) passiveIncomeDisplayVaultElement.textContent = totalPassive.toLocaleString();
-      if(passiveIncomeDisplayElement) passiveIncomeDisplayElement.innerHTML = `+${totalPassive.toLocaleString()} coins/hour`;
+      if(passiveIncomeDisplayElement) passiveIncomeDisplayElement.innerHTML = `+${totalPassive.toLocaleString()} coins/hour`; // Оновлено
     }
 
 
+    // =============================================
+    // 4. handleTapInteraction() → після TAP відправити /update
+    // =============================================
     async function handleTapInteraction() {
       const now = Date.now();
+      console.log(`[Tap] Handling tap. Current taps: ${taps}, Energy: ${energy}`);
+
       if (energy <= 0) {
         if (nextTapAvailableTime && now < nextTapAvailableTime) {
           const remain = nextTapAvailableTime - now;
@@ -1089,7 +1267,7 @@
 
       const currentTapReward = getTapReward();
       taps++;
-      tapCoinsTotal += currentTapReward;
+      tapCoinsTotal += currentTapReward; // Оновлення лічильника натапаних монет
       energy--; 
       coins += currentTapReward;
 
@@ -1097,32 +1275,42 @@
       playAudio(tapSound, "tap");
       if (navigator.vibrate) try { navigator.vibrate(25); } catch(e) {}
 
+      let droppedCapsuleThisTap = null;
       let incomeChangedThisTap = false; 
 
-      if (taps >= MAX_TAPS_BEFORE_COOLDOWN) { 
-        console.log(`[Tap] MAX_TAPS_BEFORE_COOLDOWN reached. Triggering drop & cooldown.`);
+      if (taps === MAX_TAPS_BEFORE_COOLDOWN) { 
+        console.log(`[Tap] MAX_TAPS_BEFORE_COOLDOWN (${MAX_TAPS_BEFORE_COOLDOWN}) reached at tap ${taps}. Triggering capsule drop and cooldown.`);
         const roll = Math.random() * 100;
         let capsuleType = 'silver';
         let cumulativeChance = 0;
 
-        if (roll < (cumulativeChance += capsuleDropChances.discord)) capsuleType = 'discord';
-        else if (roll < (cumulativeChance += capsuleDropChances.diamond)) capsuleType = 'diamond';
-        else if (roll < (cumulativeChance += capsuleDropChances.gold)) capsuleType = 'gold';
+        if (roll < (cumulativeChance += capsuleDropChances.discord)) {
+            capsuleType = 'discord';
+        } else if (roll < (cumulativeChance += capsuleDropChances.diamond)) {
+            capsuleType = 'diamond';
+        } else if (roll < (cumulativeChance += capsuleDropChances.gold)) {
+            capsuleType = 'gold';
+        } else {
+            capsuleType = 'silver';
+        }
         
+        console.log(`[Tap] Roll: ${roll.toFixed(2)}, Capsule dropped: ${capsuleType}`);
         ownedCapsules.push(capsuleType); 
+        droppedCapsuleThisTap = capsuleType;
         playAudio(dropSound, 'drop');
         
         await showCapsuleDropAnimation(capsuleType); 
+        console.log(`[Tap] Capsule drop animation call finished for type: ${capsuleType}`);
         
         const newTotalPassive = calculatePassiveIncome();
         if (newTotalPassive !== incomePerHour) {
             incomePerHour = newTotalPassive;
             incomeChangedThisTap = true; 
             previousIncomePerHour = incomePerHour; 
+            console.log(`[Tap] Passive income changed to: ${incomePerHour} due to new capsule.`);
         }
         
         energy = 0; 
-        taps = 0; // Reset taps after cooldown
         nextTapAvailableTime = now + COOLDOWN_MS;
         showCustomMessage(t("message_tap_limit_cooldown_template", { hours: COOLDOWN_MS / 3600000 }));
         if (cooldownIntervalId) clearInterval(cooldownIntervalId);
@@ -1142,20 +1330,30 @@
       }
     }
 
+    // =============================================
+    // 5. updateInventoryDisplay() → після зміни пасиву /update
+    // =============================================
     async function updateInventoryDisplay() {
       const totalPassive = calculatePassiveIncome();
       
       if (totalPassive !== previousIncomePerHour) { 
-        console.log(`[Game] Passive income changed. Updating server.`);
+        console.log(`[Game] Passive income changed from ${previousIncomePerHour} to ${totalPassive}. Updating server.`);
         incomePerHour = totalPassive; 
         previousIncomePerHour = totalPassive; 
         
-        await updatePlayer(playerUID, { incomePerHour: totalPassive, capsules: ownedCapsules });
+        const updateData = { incomePerHour: totalPassive };
+        // Якщо бекенд підтримує ownedCapsules, розкоментуйте:
+        // updateData.capsules = ownedCapsules;
+        await updatePlayer(playerUID, updateData);
       }
       renderCapsules(); 
       saveGameState(); 
     }
 
+
+    // =============================================
+    // 6. checkReferralActivation() → якщо milestone, /update для referrer
+    // =============================================
     async function checkReferralActivation() {
       const actualReferrerId = localStorage.getItem("manuallyReferredBy_phonetap");
       if ( actualReferrerId && actualReferrerId !== playerUID &&
@@ -1166,20 +1364,34 @@
         const updateResult = await updatePlayer(actualReferrerId, { referral: playerUID });
 
         if (updateResult && updateResult.success) {
+          console.log(`[Referral] Successfully notified server about milestone for referrer ${actualReferrerId}.`);
           localStorage.setItem(`referralMilestoneAchievedFor_${actualReferrerId}_by_${playerUID}`, "true");
+        } else {
+          console.warn(`[Referral] Failed to notify server about milestone for referrer ${actualReferrerId}.`);
         }
       }
     }
 
+    // =============================================
+    // 7. Обробник введення коду реферера
+    // =============================================
     if(confirmReferralCodeButtonElement) {
       confirmReferralCodeButtonElement.addEventListener("click", async () => {
         const enteredCode = enterReferralCodeInputElement.value.trim().toUpperCase();
-        if (!enteredCode) { showCustomMessage(t("referral_status_error_enter_code")); return; }
-        if (enteredCode === playerUID) { showCustomMessage(t("referral_status_error_own_code")); return; }
-        if (localStorage.getItem("manuallyReferredBy_phonetap")) { showCustomMessage(t("referral_status_error_already_referred")); return; }
+        if (!enteredCode) {
+          showCustomMessage(t("referral_status_error_enter_code"), 3000); return;
+        }
+        if (enteredCode === playerUID) {
+          showCustomMessage(t("referral_status_error_own_code"), 3000); return;
+        }
+        if (localStorage.getItem("manuallyReferredBy_phonetap")) {
+          showCustomMessage(t("referral_status_error_already_referred"), 3000); return;
+        }
 
+        const initialCoins = coins; 
         coins += 100; 
         localStorage.setItem("manuallyReferredBy_phonetap", enteredCode);
+        localStorage.setItem("manualReferralCodeEntered_phonetap", "true");
         showCustomMessage(t("message_referral_bonus_manual_template", { value: enteredCode }), 4000);
         
         if(enterReferralCodeSectionElement) enterReferralCodeSectionElement.classList.add("hidden");
@@ -1188,33 +1400,57 @@
         updateUIDisplay();
         saveGameState();
         
-        const updateResult = await updatePlayer(playerUID, { coins: coins, referral: enteredCode });
-        if (!updateResult || !updateResult.success) {
-            console.warn(`[Referral] Failed to save referral for player ${playerUID} on server.`);
-            // Optionally revert the change if server update fails
+        const coinsUpdateResult = await updatePlayer(playerUID, { coins: coins });
+        const referralUpdateResult = await updatePlayer(playerUID, { referral: enteredCode });
+        
+        if (coinsUpdateResult && referralUpdateResult && coinsUpdateResult.success && referralUpdateResult.success) {
+          console.log(`[Referral] Successfully set referrer and updated coins for player ${playerUID} on server.`);
+        } else {
+          console.warn(`[Referral] Failed to set referrer or update coins for player ${playerUID} on server.`);
+          coins = initialCoins; 
+          localStorage.removeItem("manuallyReferredBy_phonetap");
+          localStorage.removeItem("manualReferralCodeEntered_phonetap");
+          if(enterReferralCodeSectionElement) enterReferralCodeSectionElement.classList.remove("hidden");
+          if(referralStatusMessageElement) referralStatusMessageElement.textContent = t("message_generic_error") + " (Referral not fully saved)";
+          updateUIDisplay();
+          saveGameState();
         }
       });
     }
 
+    // =============================================
+    // 8. ІНШІ ФУНКЦІЇ
+    // ==============================================
     function loadGameState() {
       console.log("[Game] Loading game state from localStorage...");
-      playerUID = localStorage.getItem("playerUID_phonetap") || generateRandomUID();
-      localStorage.setItem("playerUID_phonetap", playerUID);
+      
+      // For Discord authenticated users, playerUID is already set to Discord ID
+      if (!isDiscordAuthenticated) {
+        const storedUID = localStorage.getItem("playerUID_phonetap");
+        if (storedUID) {
+          playerUID = storedUID;
+        } else {
+          playerUID = generateRandomUID();
+          localStorage.setItem("playerUID_phonetap", playerUID);
+        }
+      }
       
       taps = parseInt(localStorage.getItem("phonetap_taps") || "0");
       coins = parseInt(localStorage.getItem("phonetap_coins") || "0");
       energy = parseInt(localStorage.getItem("phonetap_energy") || maxEnergy.toString());
-      ownedCapsules = JSON.parse(localStorage.getItem("phonetap_ownedCapsules") || "[]");
-      nextTapAvailableTime = parseInt(localStorage.getItem("phonetap_nextTapAvailableTime")) || null;
+      const capsStored = localStorage.getItem("phonetap_ownedCapsules");
+      ownedCapsules = capsStored ? JSON.parse(capsStored) : [];
+      nextTapAvailableTime = localStorage.getItem("phonetap_nextTapAvailableTime") ? parseInt(localStorage.getItem("phonetap_nextTapAvailableTime")) : null;
       currentDailyClaimStep = parseInt(localStorage.getItem("phonetap_claimStep") || "0");
       activatedReferralsCount = parseInt(localStorage.getItem(`phonetap_activatedReferrals_${playerUID}`) || "0");
       tapCoinsTotal = parseInt(localStorage.getItem("phonetap_tapCoinsTotal") || "0"); 
 
       const localManuallyReferredBy = localStorage.getItem('manuallyReferredBy_phonetap');
-      if (localManuallyReferredBy && enterReferralCodeSectionElement) {
+      if (localManuallyReferredBy && enterReferralCodeSectionElement && referralStatusMessageElement) {
           enterReferralCodeSectionElement.classList.add('hidden');
-          if(referralStatusMessageElement) referralStatusMessageElement.textContent = t("referral_status_success_template", {value: localManuallyReferredBy});
+          referralStatusMessageElement.textContent = t("referral_status_success_template", {value: localManuallyReferredBy});
       }
+      console.log("[Game] Local game state loaded.");
     }
 
     function saveGameState() {
@@ -1231,26 +1467,35 @@
           localStorage.removeItem("phonetap_nextTapAvailableTime");
         }
         localStorage.setItem("phonetap_claimStep", currentDailyClaimStep.toString());
+        localStorage.setItem(`phonetap_activatedReferrals_${playerUID}`, activatedReferralsCount.toString());
+        const lastClaimDate = localStorage.getItem('phonetap_lastClaimDate');
+        if (lastClaimDate) localStorage.setItem('phonetap_lastClaimDate', lastClaimDate);
+        console.log("[Game] Game state saved to localStorage.");
       } catch (e) {
-        console.error("[Game] Error saving game state:", e);
-        showCustomMessage(t("message_storage_error"));
+        console.error("[Game] Error saving game state to localStorage:", e);
+        showCustomMessage(t("message_storage_error"), 5000);
       }
     }
 
     function calculatePassiveIncome() {
-      return ownedCapsules.reduce((acc, capType) => acc + (capsuleBonuses[capType] || 0), 0);
+      let passive = 0;
+      ownedCapsules.forEach((capType) => { passive += capsuleBonuses[capType] || 0; });
+      return passive;
     }
 
     function getTapReward() {
-      return 1 + calculatePassiveIncome();
+      let reward = 1;
+      ownedCapsules.forEach((cap) => { reward += capsuleBonuses[cap] || 0; });
+      return reward;
     }
 
     function showTapFeedback() {
       const container = document.getElementById('tapCapsuleElementContainer'); 
       if (!container) return;
+      const currentTapReward = getTapReward();
       const feedbackEl = document.createElement('div');
       feedbackEl.className = 'tap-feedback';
-      feedbackEl.textContent = `+${getTapReward()}`;
+      feedbackEl.textContent = `+${currentTapReward}`;
       container.appendChild(feedbackEl);
       setTimeout(() => { feedbackEl.remove(); }, 780);
     }
@@ -1259,16 +1504,32 @@
       if(energyValueElement) energyValueElement.textContent = energy.toString();
       if(maxEnergyDisplayElement) maxEnergyDisplayElement.textContent = maxEnergy.toString();
       if(coinsDisplayElement) coinsDisplayElement.textContent = coins.toLocaleString();
+      if(fuelValueElement) fuelValueElement.textContent = "0";
       
       const currentPassive = calculatePassiveIncome();
-      if(passiveIncomeDisplayElement) passiveIncomeDisplayElement.textContent = `+${currentPassive.toLocaleString()} coins/hour`;
-      if(passiveIncomeDisplayVaultElement) passiveIncomeDisplayVaultElement.textContent = currentPassive.toLocaleString();
-      if(totalTapDisplayElement) totalTapDisplayElement.textContent = `Total tapped: ${tapCoinsTotal} coins`;
+      if(passiveIncomeDisplayElement) {
+        passiveIncomeDisplayElement.textContent = `+${currentPassive.toLocaleString()} coins/hour`;
+      }
+      if(passiveIncomeDisplayVaultElement) {
+        passiveIncomeDisplayVaultElement.textContent = currentPassive.toLocaleString();
+      }
+
+      if(totalTapDisplayElement) { 
+        totalTapDisplayElement.textContent = `Total tapped: ${tapCoinsTotal} coins`;
+      }
       
       if (mainTapCapsuleImageElement) { 
-        const isInactive = energy <= 0 && nextTapAvailableTime && Date.now() < nextTapAvailableTime;
-        mainTapCapsuleImageElement.style.filter = isInactive ? 'grayscale(100%) brightness(0.5)' : '';
-        mainTapCapsuleImageElement.style.animation = isInactive ? 'none' : 'glowPulsePunk 2.5s infinite ease-in-out';
+        if (energy <= 0 && nextTapAvailableTime && Date.now() < nextTapAvailableTime) {
+            mainTapCapsuleImageElement.style.filter = 'grayscale(100%) brightness(0.5)';
+            if (mainTapCapsuleImageElement.style.animationName && mainTapCapsuleImageElement.style.animationName !== 'none') {
+                 mainTapCapsuleImageElement.style.animation = 'none';
+            }
+        } else {
+            mainTapCapsuleImageElement.style.filter = '';
+            if (!mainTapCapsuleImageElement.style.animationName || mainTapCapsuleImageElement.style.animationName === 'none') {
+                 mainTapCapsuleImageElement.style.animation = 'glowPulsePunk 2.5s infinite ease-in-out';
+            }
+        }
       }
     }
 
@@ -1276,13 +1537,10 @@
       if (!nextTapAvailableTime || Date.now() >= nextTapAvailableTime) {
         if(cooldownTimerDisplayElement) cooldownTimerDisplayElement.textContent = "";
         if (cooldownIntervalId) { clearInterval(cooldownIntervalId); cooldownIntervalId = null; }
-        if (energy === 0) { // Check only for energy, not taps
-          energy = maxEnergy;
-          taps = 0; // Reset taps when energy is restored
-          nextTapAvailableTime = null;
+        if (energy === 0 && taps >= MAX_TAPS_BEFORE_COOLDOWN) {
+          energy = maxEnergy; taps = 0; nextTapAvailableTime = null;
           showCustomMessage(t("message_energy_recharged"));
-          updateUIDisplay(); 
-          saveGameState();
+          updateUIDisplay(); saveGameState();
         }
         return;
       }
@@ -1299,7 +1557,7 @@
         if (!leaderboardListElement) return;
         const topPlayers = getLocalLeaderboard(); 
         leaderboardListElement.innerHTML = ""; 
-        if (topPlayers.length === 0) { 
+        if (topPlayers.length === 0 && leaderboardListElement.querySelector('p') === null) { 
              const emptyMsg = document.createElement('p');
              emptyMsg.className = "text-gray-400 font-mono";
              emptyMsg.setAttribute('data-translate-key', "leaderboard_empty_message");
@@ -1318,7 +1576,7 @@
     function getLocalLeaderboard() {
         const username = localStorage.getItem('phonetap_username') || `AGENT-${playerUID.substring(0,4)}`;
         localStorage.setItem('phonetap_username', username);
-        let leaderboard = JSON.parse(localStorage.getItem('phonetap_leaderboard') || "[]");
+        let leaderboard = JSON.parse(localStorage.getItem('phonetap_leaderboard')) || [];
         const userIndex = leaderboard.findIndex(p => p.name === username);
         if (userIndex > -1) {
             leaderboard[userIndex].coins = coins;
@@ -1332,13 +1590,14 @@
 
     function scheduleLeaderboardReset() {
       const now = new Date();
-      const nextMidnightUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+      const nextMidnightUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
       let msUntilReset = nextMidnightUTC.getTime() - now.getTime();
+      if (msUntilReset < 0) msUntilReset += 24 * 60 * 60 * 1000;
+      console.log(`[Game] Leaderboard reset scheduled in ${Math.round(msUntilReset / (1000 * 60))} minutes.`);
       setTimeout(() => {
         localStorage.removeItem('phonetap_leaderboard');
-        showCustomMessage(t("message_leaderboard_reset"));
-        updateLeaderboard(); 
-        scheduleLeaderboardReset();
+        showCustomMessage(t("message_leaderboard_reset"), 5000);
+        updateLeaderboard(); scheduleLeaderboardReset();
       }, msUntilReset);
     }
 
@@ -1358,12 +1617,14 @@
         if (nextRewardDayVisual === 1 && currentDailyClaimStep === 7) rewardText = t("daily_reward_new_cycle_template", {value: dailyRewards[0].value });
         dailyClaimStatusElement.textContent = t("daily_cache_available_message_template", {day: nextRewardDayVisual, reward_text: rewardText});
         claimDailyRewardButtonElement.textContent = t("daily_cache_button_claim_template", {day: nextRewardDayVisual});
+        claimDailyRewardButtonElement.setAttribute('data-day-target', nextRewardDayVisual);
       } else {
         claimDailyRewardButtonElement.disabled = true;
         dailyClaimStatusElement.textContent = t("daily_cache_claimed_today_message");
         let claimedDayForButton = currentDailyClaimStep;
         if (claimedDayForButton === 0 && localStorage.getItem("phonetap_lastClaimDate_day7_just_claimed") === "true") claimedDayForButton = 7;
         claimDailyRewardButtonElement.textContent = claimedDayForButton === 0 && !(localStorage.getItem("phonetap_lastClaimDate_day7_just_claimed") === "true") ? t("daily_cache_button_claimed_na") : t("daily_cache_button_claimed_template", {day: claimedDayForButton});
+        claimDailyRewardButtonElement.setAttribute('data-day-target', claimedDayForButton);
       }
     }
     function renderDailyRewardsGrid() {
@@ -1387,72 +1648,86 @@
     async function handleClaimDailyReward() {
         const todayDateString = new Date().toISOString().split('T')[0];
         if (localStorage.getItem("phonetap_lastClaimDate") === todayDateString) {
-            showCustomMessage(t("message_daily_reward_claimed_already")); return;
+            showCustomMessage(t("message_daily_reward_claimed_already"), 3000); return;
         }
-        currentDailyClaimStep = (Number(localStorage.getItem("phonetap_claimStep") || 0) % 7) + 1;
-        
+        let tempCurrentDailyClaimStep = Number(localStorage.getItem("phonetap_claimStep") || 0);
+        if (tempCurrentDailyClaimStep === 7) tempCurrentDailyClaimStep = 1; else tempCurrentDailyClaimStep++;
+        currentDailyClaimStep = tempCurrentDailyClaimStep;
+        let rewardMessageKey = ""; let rewardParams = {};
         const rewardInfo = dailyRewards[currentDailyClaimStep - 1];
-        let rewardParams = { day: currentDailyClaimStep };
+        let fieldsToUpdateForDaily = { coins: coins }; 
 
         if (rewardInfo.type === 'coins') {
-            coins += rewardInfo.value; 
-            rewardParams.value = rewardInfo.value;
-            showCustomMessage(t("message_daily_reward_coins_template", rewardParams));
+            coins += rewardInfo.value; rewardMessageKey = "message_daily_reward_coins_template";
+            rewardParams = {value: rewardInfo.value, day: currentDailyClaimStep};
+            fieldsToUpdateForDaily.coins = coins; 
         } else if (rewardInfo.type === 'capsule') {
             ownedCapsules.push(rewardInfo.value);
             await updateInventoryDisplay(); 
-            rewardParams.value = t(`capsule_${rewardInfo.value}`).toUpperCase();
-            showCustomMessage(t("message_daily_reward_capsule_template", rewardParams));
+            rewardMessageKey = "message_daily_reward_capsule_template";
+            rewardParams = {value: t(`capsule_${rewardInfo.value}`).toUpperCase(), day: currentDailyClaimStep};
         }
-
+        showCustomMessage(t(rewardMessageKey, rewardParams), 4000);
         localStorage.setItem("phonetap_lastClaimDate", todayDateString);
         localStorage.setItem("phonetap_claimStep", currentDailyClaimStep.toString());
-        
         if (currentDailyClaimStep === 7) localStorage.setItem("phonetap_lastClaimDate_day7_just_claimed", "true");
         else localStorage.removeItem("phonetap_lastClaimDate_day7_just_claimed");
+        updateUIDisplay(); saveGameState(); checkDailyClaimAvailability();
         
-        updateUIDisplay(); 
-        saveGameState(); 
-        checkDailyClaimAvailability();
-        
-        await updatePlayer(playerUID, { coins: coins, capsules: ownedCapsules });
+        if (rewardInfo.type === 'coins') { 
+            await updatePlayer(playerUID, { coins: fieldsToUpdateForDaily.coins });
+        }
     }
 
+    // Оновлена функція showCapsuleDropAnimation
     async function showCapsuleDropAnimation(capsuleType) { 
-        if (!capsuleDropModalElement) return;
+        if (!capsuleDropModalElement) {
+            console.error("[ModalError] Capsule drop modal element not found.");
+            return;
+        }
+
         const image = document.getElementById("droppedCapsuleImage");
         const infoText = document.getElementById("droppedCapsuleInfo");
         const bonusText = document.getElementById("droppedCapsuleBonus");
         const chanceText = document.getElementById("droppedCapsuleChance");
-        if (!image || !infoText || !bonusText || !chanceText) return;
+        
+        if (!image || !infoText || !bonusText || !chanceText) {
+            console.error("[ModalError] One or more elements inside capsule drop modal are missing.");
+            return;
+        }
+        
+        console.log(`[Animation] Showing capsule drop for type: ${capsuleType}`);
         
         image.src = capsuleImageMap[capsuleType] || ""; 
+        image.alt = `${capsuleType} capsule`;
+        
         infoText.textContent = `You got a ${capsuleType.toUpperCase()} capsule!`;
         bonusText.textContent = `+${capsuleBonuses[capsuleType]} coins/hour`;
-        chanceText.innerHTML = t("capsule_drop_chance_template", { chance: capsuleDropChances[capsuleType] || 0 });
+        const dropChance = capsuleDropChances[capsuleType] || 0;
+        chanceText.innerHTML = t("capsule_drop_chance_template", { chance: dropChance });
         
         capsuleDropModalElement.classList.remove('hidden'); 
         capsuleDropModalElement.classList.add('modal', 'show'); 
+        
         playAudio(dropSound, 'drop');
+        console.log("[Animation] Modal should be visible with animation.");
 
-        return new Promise(resolve => {
-            setTimeout(() => {
-                capsuleDropModalElement.classList.remove('show');
-                setTimeout(() => { 
-                    if (!capsuleDropModalElement.classList.contains('show')) {
-                        capsuleDropModalElement.classList.add('hidden');
-                    }
-                    resolve();
-                }, 300); 
-            }, 4000);
-        });
+        setTimeout(() => {
+            capsuleDropModalElement.classList.remove('show');
+            setTimeout(() => { 
+                 if (!capsuleDropModalElement.classList.contains('show')) {
+                    capsuleDropModalElement.classList.add('hidden');
+                 }
+            }, 300); 
+        }, 4000);
     }
+
 
     async function applyPassiveIncome() {
       const hourlyBonus = calculatePassiveIncome(); 
       if (hourlyBonus > 0) {
         coins += hourlyBonus;
-        showCustomMessage(t("message_passive_income_received_template", { value: hourlyBonus.toLocaleString() }));
+        showCustomMessage(t("message_passive_income_received_template", { value: hourlyBonus.toLocaleString() }), 4000);
         updateUIDisplay();
         saveGameState();
         await updatePlayer(playerUID, { coins: coins }); 
@@ -1467,105 +1742,141 @@
             coins += 25;
             localStorage.setItem('urlReferredBy_phonetap', refIdFromURL);
             localStorage.setItem("refUrlBonusClaimed_phonetap", "true");
-            showCustomMessage(t("message_referral_bonus_url_template", {value: refIdFromURL}));
+            showCustomMessage(t("message_referral_bonus_url_template", {value: refIdFromURL}), 4000);
             updateUIDisplay();
             saveGameState();
             await updatePlayer(playerUID, { referral: refIdFromURL, coins: coins });
         }
         const manuallyReferredBy = localStorage.getItem('manuallyReferredBy_phonetap');
-        if (manuallyReferredBy && enterReferralCodeSectionElement) {
+        if (manuallyReferredBy && enterReferralCodeSectionElement && referralStatusMessageElement) {
             enterReferralCodeSectionElement.classList.add('hidden');
-            if(referralStatusMessageElement) referralStatusMessageElement.textContent = t("referral_status_success_template", {value: manuallyReferredBy});
+            referralStatusMessageElement.textContent = t("referral_status_success_template", {value: manuallyReferredBy});
+        } else if (enterReferralCodeSectionElement && referralStatusMessageElement) {
+            enterReferralCodeSectionElement.classList.remove('hidden');
+            referralStatusMessageElement.textContent = '';
         }
         if(activatedReferralsCountDisplayElement) activatedReferralsCountDisplayElement.textContent = activatedReferralsCount;
     }
 
-    // Спрощена логіка перемикання вкладок
+    // =============================================
+    // 9. ПЕРЕМИКАННЯ ВКЛАДОК
+    // =============================================
     navButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
-        // Деактивувати всі кнопки та вкладки
         navButtons.forEach((b) => b.classList.remove("active"));
         tabContents.forEach((tc) => tc.classList.remove("active"));
-
-        // Активувати натиснуту кнопку та відповідну вкладку
         btn.classList.add("active");
         const tabName = btn.getAttribute("data-tab");
         currentActiveTab = tabName; 
         const activeTabContent = document.getElementById(tabName);
-        if (activeTabContent) {
-          activeTabContent.classList.add("active");
-        }
+        if (activeTabContent) activeTabContent.classList.add("active");
 
-        // Запустити оновлення для щойно активованої вкладки
         if (tabName === "ranksTab") updateLeaderboard();
         else if (tabName === "vaultTab") renderCapsules(); 
-        else if (tabName === "inviteTab") updateInviteTabOnLanguageChange();
-        else if (tabName === "tasksTab") checkDailyClaimAvailability();
+        else if (tabName === "inviteTab") {
+          if(playerInviteCodeDisplayElement) playerInviteCodeDisplayElement.value = playerUID;
+          if(activatedReferralsCountDisplayElement) activatedReferralsCountDisplayElement.textContent = activatedReferralsCount;
+          const manuallyReferredBy = localStorage.getItem("manuallyReferredBy_phonetap");
+          if (manuallyReferredBy && enterReferralCodeSectionElement && referralStatusMessageElement) {
+            enterReferralCodeSectionElement.classList.add("hidden");
+            referralStatusMessageElement.textContent = t("referral_status_success_template", { value: manuallyReferredBy });
+          } else if (enterReferralCodeSectionElement && referralStatusMessageElement) {
+            enterReferralCodeSectionElement.classList.remove("hidden");
+            referralStatusMessageElement.textContent = '';
+          }
+        } else if (tabName === "tasksTab") {
+          checkDailyClaimAvailability();
+        }
       });
     });
 
-    function initApp() {
-      console.log("[Setup] Starting application...");
-      document.body.classList.remove("overflow-hidden");
-
+    // =============================================
+    // 10. ЗАПУСК ГРИ
+    // =============================================
+    function preInitialize() {
+      console.log("[Setup] Starting pre-initialization...");
       tapSound = initSound('assetssfx/tap_click.mp3', 'tap');
       dropSound = initSound('assetssfx/capsule_drop.mp3', 'drop');
       boostSound = initSound('assetssfx/boost_activate.mp3', 'boost');
-
+      
+      // Initialize Discord login
+      initDiscordLogin();
+      
       const savedLocale = localStorage.getItem('phonetap_locale');
       if (savedLocale && translations[savedLocale]) {
         languageModalElement.style.display = 'none';
         appContainerElement.style.display = 'flex';
         setLanguage(savedLocale);
-        initializeGame();
+        
+        // Check Discord authentication
+        if (!checkDiscordAuth()) {
+          showLoginForm();
+        } else {
+          initializeGame();
+        }
       } else {
         languageModalElement.style.display = 'flex';
         appContainerElement.style.display = 'none';
       }
-      
-      document.querySelectorAll('.language-button').forEach(button => {
-        button.addEventListener('click', () => {
-            const selectedLang = button.getAttribute('data-lang');
-            if (languageModalElement) languageModalElement.style.display = 'none';
-            if (appContainerElement) appContainerElement.style.display = 'flex';
-            setLanguage(selectedLang);
-            initializeGame();
-        });
-      });
-
-      if(mainTapCapsuleImageElement) { 
-          mainTapCapsuleImageElement.addEventListener("click", handleTapInteraction);
-          mainTapCapsuleImageElement.addEventListener("contextmenu", (e) => e.preventDefault());
-      }
-      if(closeDropModalButtonElement) {
-          closeDropModalButtonElement.addEventListener('click', () => capsuleDropModalElement.classList.remove('show'));
-          capsuleDropModalElement.addEventListener('click', (e) => { if (e.target === capsuleDropModalElement) capsuleDropModalElement.classList.remove('show'); });
-      }
-      if(claimDailyRewardButtonElement) {
-          claimDailyRewardButtonElement.addEventListener('click', handleClaimDailyReward);
-      }
-      if(copyInviteCodeButtonElement) {
-          copyInviteCodeButtonElement.addEventListener('click', () => {
-              if(!playerInviteCodeDisplayElement) return;
-              playerInviteCodeDisplayElement.select();
-              playerInviteCodeDisplayElement.setSelectionRange(0, 99999);
-              try {
-                  navigator.clipboard.writeText(playerInviteCodeDisplayElement.value)
-                      .then(() => showCustomMessage(t("message_link_copied"), 2000))
-                      .catch(() => {
-                          if (document.execCommand('copy')) showCustomMessage(t("message_link_copied_fallback"), 2000);
-                          else showCustomMessage(t("message_link_copy_failed"), 3000);
-                      });
-              } catch (err) {
-                  if (document.execCommand('copy')) showCustomMessage(t("message_link_copied_fallback"), 2000);
-                  else showCustomMessage(t("message_link_copy_failed"), 3000);
-              }
-          });
-      }
-      console.log("[Setup] Application setup finished.");
+      console.log("[Setup] Pre-initialization finished.");
     }
-    
-    document.addEventListener('DOMContentLoaded', initApp);
+
+    document.querySelectorAll('.language-button').forEach(button => {
+      button.addEventListener('click', () => {
+        const selectedLang = button.getAttribute('data-lang');
+        if (languageModalElement) languageModalElement.style.display = 'none';
+        if (appContainerElement) appContainerElement.style.display = 'flex';
+        setLanguage(selectedLang);
+        
+        // Check Discord authentication after language selection
+        if (!checkDiscordAuth()) {
+          showLoginForm();
+        } else {
+          initializeGame();
+        }
+      });
+    });
+
+    if(mainTapCapsuleImageElement) { 
+        mainTapCapsuleImageElement.addEventListener("click", handleTapInteraction);
+        mainTapCapsuleImageElement.addEventListener("contextmenu", (e) => e.preventDefault());
+    }
+    if(closeDropModalButtonElement && capsuleDropModalElement) {
+        closeDropModalButtonElement.addEventListener('click', () => {
+            capsuleDropModalElement.classList.remove('show'); 
+        });
+        capsuleDropModalElement.addEventListener('click', (event) => {
+            if (event.target === capsuleDropModalElement) {
+                capsuleDropModalElement.classList.remove('show'); 
+            }
+        });
+    }
+    if(claimDailyRewardButtonElement) {
+        claimDailyRewardButtonElement.addEventListener('click', handleClaimDailyReward);
+    }
+    if(copyInviteCodeButtonElement && playerInviteCodeDisplayElement) {
+        copyInviteCodeButtonElement.addEventListener('click', () => {
+            playerInviteCodeDisplayElement.select();
+            playerInviteCodeDisplayElement.setSelectionRange(0, 99999);
+            try {
+                navigator.clipboard.writeText(playerInviteCodeDisplayElement.value)
+                    .then(() => showCustomMessage(t("message_link_copied"), 2000))
+                    .catch(err => {
+                        console.warn('[Clipboard] Async clipboard write failed:', err);
+                        if (document.execCommand('copy')) showCustomMessage(t("message_link_copied_fallback"), 2000);
+                        else showCustomMessage(t("message_link_copy_failed"), 3000);
+                    });
+            } catch (err) {
+                console.warn('[Clipboard] navigator.clipboard not available:', err);
+                if (document.execCommand('copy')) showCustomMessage(t("message_link_copied_fallback"), 2000);
+                else showCustomMessage(t("message_link_copy_failed"), 3000);
+            }
+        });
+    }
+
+    // setInterval(applyPassiveIncome, 3600000); // Перенесено в initializeGame, щоб уникнути багаторазового запуску
+    preInitialize();
+
   </script>
 </body>
 </html>
