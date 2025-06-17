@@ -1,7 +1,6 @@
-// mongo.js
 const { MongoClient } = require('mongodb');
 
-const MONGODB_URI = process.env.MONGODB_URI; // має бути у Render Environment
+const MONGODB_URI = process.env.MONGODB_URI;
 const DB_NAME = 'phonetap'; // або твоя назва бази
 
 let client;
