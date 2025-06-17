@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3000;
 const CLIENT_ID = "1376165214206296215";
 const CLIENT_SECRET = "mJam66t0IjNnrilqf43UCJMjrB2Z1FjZ";
 const REDIRECT_URI = "https://discord-0c0o.onrender.com/auth/callback";
-const MONGODB_URI = "mongodb+srv://sslobodianij86:<1DuWTvhqaCBLKHob>@cluster0.orzbpzg.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+   const MONGODB_URI = process.env.MONGODB_URI;
 
 // Перевірка змінних середовища
 if (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URI || !MONGODB_URI) {
