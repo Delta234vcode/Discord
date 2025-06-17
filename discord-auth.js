@@ -2,9 +2,8 @@ const axios = require('axios');
 const express = require('express');
 const router = express.Router();
 const { getUsersCollection } = require('./mongo');
-
-const CLIENT_ID = process.env.CLIENT_ID;
-const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const CLIENT_ID = "1376165214206296215";
+const CLIENT_SECRET = "mJam66t0IjNnrilqf43UCJMjrB2Z1FjZ";
 const REDIRECT_URI = process.env.REDIRECT_URI;
 
 function generateReferralCode(username) {
