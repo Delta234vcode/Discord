@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb');
 
 const MONGODB_URI = process.env.MONGODB_URI;
-const DB_NAME = 'phonetap'; // або твоя назва бази
+const DB_NAME = 'Cluster0'; // або твоя назва бази
 
 let client;
 let db;
