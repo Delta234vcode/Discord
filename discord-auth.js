@@ -1,16 +1,12 @@
 const axios = require('axios');
 const express = require('express');
 const router = express.Router();
+const { getUsersCollection } = require('./mongo');
 
-// Підключи свою MongoDB-колекцію (usersCollection) через require або передай у router
-const { getUsersCollection } = require('./mongo'); // приклад, як підключити
-
-// Discord OAuth2 config
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI;
 
-// Генерація реферального коду
 function generateReferralCode(username) {
   const sanitized = username.toLowerCase().replace(/[^a-z0-9]/g, "").substring(0, 10);
   return `${sanitized}${Math.floor(100 + Math.random() * 900)}`;
@@ -29,7 +25,6 @@ router.get("/auth/callback", async (req, res) => {
   if (!code) return res.status(400).send("No code");
 
   try {
-    // 1. Отримати access_token
     const tokenRes = await axios.post("https://discord.com/api/oauth2/token", new URLSearchParams({
       client_id: CLIENT_ID,
       client_secret: CLIENT_SECRET,
@@ -42,14 +37,12 @@ router.get("/auth/callback", async (req, res) => {
 
     const { access_token } = tokenRes.data;
 
-    // 2. Отримати дані користувача
     const userRes = await axios.get("https://discord.com/api/users/@me", {
       headers: { Authorization: `Bearer ${access_token}` }
     });
 
     const { id: discordId, username, avatar } = userRes.data;
 
-    // 3. MongoDB: створити користувача, якщо не існує
     const usersCollection = await getUsersCollection();
     let user = await usersCollection.findOne({ discordId });
     if (!user) {
@@ -66,7 +59,6 @@ router.get("/auth/callback", async (req, res) => {
       await usersCollection.insertOne(user);
     }
 
-    // 4. Встановити cookie (SameSite=None, secure: true)
     res.cookie("discord_id", discordId, {
       httpOnly: true,
       sameSite: "None",
@@ -74,7 +66,7 @@ router.get("/auth/callback", async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000
     });
 
-    // 5. JS-редірект (щоб cookie гарантовано зберігся)
+    // JS-редірект для гарантованого збереження cookie
     res.send('<script>window.location.href = "/"</script>');
   } catch (err) {
     console.error("OAuth error:", err.response?.data || err.message);
